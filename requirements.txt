@@ -1,2 +1,4 @@
 Flask
 Gunicorn
+pandas
+whatstk
