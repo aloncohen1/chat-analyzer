@@ -1,4 +1,3 @@
+whatstk
 Flask
 Gunicorn
-pandas
-whatstk
