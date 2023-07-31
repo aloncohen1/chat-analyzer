@@ -1,3 +1,2 @@
-whatstk
 Flask
-Gunicorn
+whatstk
