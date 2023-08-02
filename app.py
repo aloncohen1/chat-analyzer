@@ -1,6 +1,3 @@
-import os
-#import pandas as pd
-os.system("pip install whatstk")
 from whatstk import df_from_txt_whatsapp
 
 from flask import *
