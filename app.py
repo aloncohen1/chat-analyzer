@@ -25,7 +25,7 @@ def success():
             os.system(f'rm {os.path.join(EXPORT_PATH, secure_filename(f.filename))}')
             return df.to_html()
         except Exception as e:
-            return f'<html><title>ERROR: {e}</title></html>'
+            return f'<html><body><h1>ERROR: {e}</h1></body></html>'
 
 
 if __name__ == '__main__':
