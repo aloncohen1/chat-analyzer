@@ -16,6 +16,7 @@ def main():
 @app.route('/success', methods=['POST'])
 def success():
     if request.method == 'POST':
+    try:
         f = request.files['file']
 
         f.save(os.path.join(EXPORT_PATH, secure_filename(f.filename)))
@@ -23,7 +24,8 @@ def success():
         df = df_from_txt_whatsapp(os.path.join(EXPORT_PATH, secure_filename(f.filename)))
         os.system(f'rm {os.path.join(EXPORT_PATH, secure_filename(f.filename))}')
         return df.to_html()
-
+    except Exception as e:
+        return f'<html><title>ERROR: {e}</title></html>'
 
 
 if __name__ == '__main__':
