@@ -1,31 +1,41 @@
+from flask import Flask, render_template, request, redirect, url_for
 from whatstk import df_from_txt_whatsapp
 from werkzeug.utils import secure_filename
 import os
-from flask import *
 
 app = Flask(__name__)
 
-EXPORT_PATH =   '/Users/aloncohen/private_repos/whatsapp-analyzer/data'
-# EXPORT_PATH = '/home/aloncohen/whatsapp-analyzer/data'
-
-# @app.route('/')
-# def main():
-#     return render_template("upload_file.html")
+# EXPORT_PATH =   '/Users/aloncohen/private_repos/whatsapp-analyzer/data'
+EXPORT_PATH = '/home/aloncohen/whatsapp-analyzer/data'
 
 
-@app.route('/success', methods=['POST'])
-def success():
+
+@app.route('/', methods=['GET', 'POST'])
+def upload_file():
     if request.method == 'POST':
-        try:
-            f = request.files['file']
+        f = request.files['file']
+        f.save(os.path.join(EXPORT_PATH, secure_filename(f.filename)))
+        return redirect(url_for('display_file', content=os.path.join(EXPORT_PATH, secure_filename(f.filename))))
+    return render_template('index.html')
 
-            f.save(os.path.join(EXPORT_PATH, secure_filename(f.filename)))
-            df = df_from_txt_whatsapp(os.path.join(EXPORT_PATH, secure_filename(f.filename)))
-            os.system(f'rm {os.path.join(EXPORT_PATH, secure_filename(f.filename))}')
-            return df.to_html()
-        except Exception as e:
-            return f'<html><body><h1>ERROR: {e}</h1></body></html>'
 
+@app.route('/display')
+def display_file():
+    try:
+        f_path = request.args.get('content', '')
+
+        df = df_from_txt_whatsapp(f_path)
+        os.system(f'rm {f_path}')
+        #return render_template(df.to_html())
+        return render_template('display.html', tables=[df.to_html(classes='data', header="true")])
+    except Exception as e:
+        return f'<html><body><h1>ERROR: {e}</h1></body></html>'
+    # return render_template('display.html', tables=[df.to_html(classes='data', header="true")])
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+
+
+
+
