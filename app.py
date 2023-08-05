@@ -5,12 +5,12 @@ from flask import *
 
 app = Flask(__name__)
 
-EXPORT_PATH = '/home/aloncohen/whatsapp-analyzer/data' # '/Users/aloncohen/private_repos/whatsapp-analyzer/data'
+EXPORT_PATH =   '/Users/aloncohen/private_repos/whatsapp-analyzer/data'
+# EXPORT_PATH = '/home/aloncohen/whatsapp-analyzer/data'
 
-
-@app.route('/')
-def main():
-    return render_template("index.html")
+# @app.route('/')
+# def main():
+#     return render_template("upload_file.html")
 
 
 @app.route('/success', methods=['POST'])
@@ -20,7 +20,6 @@ def success():
             f = request.files['file']
 
             f.save(os.path.join(EXPORT_PATH, secure_filename(f.filename)))
-            print(os.path.join(EXPORT_PATH, secure_filename(f.filename)))
             df = df_from_txt_whatsapp(os.path.join(EXPORT_PATH, secure_filename(f.filename)))
             os.system(f'rm {os.path.join(EXPORT_PATH, secure_filename(f.filename))}')
             return df.to_html()

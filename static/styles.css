@@ -1,0 +1,65 @@
+body {
+  font-family: 'Lato', sans-serif;
+  min-height: 100vh;
+  max-width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5vmax;
+  box-sizing: border-box;
+  background: linear-gradient(to top right, #bf7a6b 0%, #e6d8a7 100%);
+}
+
+/* Styles for the file upload */
+input[type="file"] {
+  outline: none;
+  padding: 4px;
+  margin: -4px;
+  position: relative;
+}
+
+
+input[type="file"]::file-selector-button {
+  border-radius: 4px;
+  padding: 0 16px;
+  height: 40px;
+  cursor: pointer;
+  background-color: white;
+  border: 1px solid rgba(0, 0, 0, 0.16);
+  box-shadow: 0px 1px 0px rgba(0, 0, 0, 0.05);
+  margin-right: 16px;
+  transition: background-color 200ms;
+}
+
+input[type="file"]::file-selector-button:hover {
+  background-color: #f3f4f6;
+}
+
+input[type="file"]::file-selector-button:active {
+  background-color: #e5e7eb;
+}
+
+/* Styles for the Submit button */
+.submit-button {
+  border-radius: 4px;
+  padding: 0 16px;
+  height: 40px;
+  cursor: pointer;
+  background-color: white;
+  color: black;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0px 1px 0px rgba(0, 0, 0, 0.05);
+  transition: background-color 200ms, color 200ms;
+}
+
+
+/* default boilerplate to center input */
+body {
+  min-height: 100vh;
+  max-width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5vmax;
+  box-sizing: border-box;
+}

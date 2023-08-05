@@ -1,21 +1,41 @@
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+from flask import Flask, render_template, request, redirect, url_for
+from whatstk import df_from_txt_whatsapp
+from werkzeug.utils import secure_filename
+import os
 
-chrome_options = Options()
-# chrome_options.add_argument("--headless")
+app = Flask(__name__)
 
-driver = webdriver.Chrome(options=chrome_options)
-print(driver)
-driver.get('https://www.yad2.co.il/realestate/forsale?topArea=2&area=11&city=6200')
+# EXPORT_PATH =   '/Users/aloncohen/private_repos/whatsapp-analyzer/data'
+EXPORT_PATH = '/home/aloncohen/whatsapp-analyzer/data'
 
-# search_input = WebDriverWait(driver, 10).until(
-#     EC.presence_of_element_located((By.ID, 'textSearchHome'))
-# )
-# search_input.send_keys('cars')
 
-WebDriverWait(driver, 10).until(driver.navigate().refresh())
 
-print('3')
+@app.route('/', methods=['GET', 'POST'])
+def upload_file():
+    if request.method == 'POST':
+        f = request.files['file']
+        f.save(os.path.join(EXPORT_PATH, secure_filename(f.filename)))
+        return redirect(url_for('display_file', content=os.path.join(EXPORT_PATH, secure_filename(f.filename))))
+    return render_template('index.html')
+
+
+@app.route('/display')
+def display_file():
+    try:
+        f_path = request.args.get('content', '')
+
+        df = df_from_txt_whatsapp(f_path)
+        os.system(f'rm {f_path}')
+        #return render_template(df.to_html())
+        return render_template('display.html', tables=[df.to_html(classes='data', header="true")])
+    except Exception as e:
+        return f'<html><body><h1>ERROR: {e}</h1></body></html>'
+    # return render_template('display.html', tables=[df.to_html(classes='data', header="true")])
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+
+
+
+

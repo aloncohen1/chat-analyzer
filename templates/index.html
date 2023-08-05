@@ -1,12 +1,23 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>upload the file : GFG</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Upload</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <form action = "/success" method = "post" enctype="multipart/form-data">
-        <input type="file" name="file" />
-        <input type = "submit" value="Upload">
-    </form>
+<link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <div class="container">
+        <h1>Analyze your Whatspp Chat!</h1>
+        <form action="/" method="POST" enctype="multipart/form-data" id="file-upload-form">
+            <input type="file" name="file" id="file-upload" accept=".txt">
+            <button type="submit" class="submit-button">Submit</button>
+        </form>
+        <div id="response"></div>
+    </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+
 </body>
 </html>
