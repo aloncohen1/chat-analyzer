@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>View Data</h1>
+    {{ data | safe }}
+</body>
+</html>
