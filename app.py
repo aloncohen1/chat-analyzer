@@ -8,7 +8,7 @@ import pandas as pd
 
 app = Flask(__name__)
 
-UPLOAD_FOLDER = 'data'
+UPLOAD_FOLDER = '/home/aloncohen/whatsapp-analyzer/data'
 ALLOWED_EXTENSIONS = {'txt'}
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
