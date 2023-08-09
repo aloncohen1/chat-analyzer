@@ -1,4 +1,4 @@
-<!-- Coding By CodingNepal - codingnepalweb.com -->
+
 <html lang="en">
   <head>
       <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
@@ -13,6 +13,7 @@
 
   </head>
   <body>
+
     <nav class="sidebar">
       <a href="#" class="logo"><center>Whatsapp Analyzer</center></a>
       <div class="menu-content">
@@ -32,10 +33,8 @@
     </nav>
 
     <main class="main">
-        <h1>user_level_analysis</h1>
-        {{ data | safe }}
-    </main>
-    <div id="plotly-plot"></div>
+
+           <div id="plotly-plot"></div>
 
     <script>
         // Get the graph JSON data from the Flask template
@@ -44,10 +43,8 @@
         // Create the plot using graphJSON
         Plotly.react('plotly-plot', graphJSON, {});
     </script>
+
+    </main>
   </body>
-{#<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>#}
-{#<script type='text/javascript'>#}
-{#  var graphs = {{graphJSON | safe}};#}
-{#  Plotly.plot('chart',graphs,{});#}
-{#</script>#}
+
 </html>

@@ -1,6 +1,7 @@
 import pandas as pd
 from whatstk import WhatsAppChat
 from whatstk.graph import plot, FigureBuilder
+import plotly.express as px
 import plotly
 import json
 
@@ -19,9 +20,11 @@ def get_hourly_activity(df):
 
     return df.groupby('hour', as_index=False).agg(n_message=('username', 'count'))
 
-def get_monthly_activity(df):
+def plot_monthly_activity(df):
+    fig = px.line(df.groupby('month', as_index=False).agg(n_message=('username', 'count')),
+                  x="month", y="n_message", title='messages count over time')
+    return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
-    return df.groupby('month',as_index=False).agg(n_message=('username','count'))
 
 
 def plot_user_message_responses_flow(df, n_users=5):
