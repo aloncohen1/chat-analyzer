@@ -4,6 +4,8 @@ from whatstk import df_from_txt_whatsapp
 from hashlib import md5
 from flask_session import Session
 
+from utils.whtasup_utils import plot_user_message_responses_flow
+
 app = Flask(__name__)
 
 app.config["SESSION_PERMANENT"] = False
@@ -26,15 +28,18 @@ def allowed_file(filename):
 
 @app.route(f'/general_statistics/<filename>')
 def general_statistics(filename):
-    return session["data"].head().to_html()
+    #session["data"].head().to_html()
+    return render_template('general_statistics.html', data=session["data"].head().to_html(classes='data'), value=filename)
 
 @app.route(f'/user_level_analysis/<filename>')
 def user_level_analysis(filename):
-    return "User Level Analysis"
+    plot = plot_user_message_responses_flow(session['data'])
+
+    return render_template('user_level_analysis.html', graphJSON=plot, value=filename)
 
 @app.route(f'/text_analysis/<filename>')
 def text_analysis(filename):
-    return "Text Analysis"
+    return render_template('text_analysis.html', data=session["data"].head().to_html(classes='data'), value=filename)
 
 @app.route('/about/')
 def about():
@@ -69,7 +74,7 @@ def view_data(filename):
         session['file_name'] = filename
 
         os.system(f'rm {file_path}')
-        return render_template('view_data.html', data=session["data"].to_html(classes='data'), value=filename)
+        return render_template('view_data.html', data=session["data"].head().to_html(classes='data'), value=filename)
     except Exception as e:
         return f"Error: {e}"
 

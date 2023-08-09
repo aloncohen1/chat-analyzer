@@ -118,7 +118,7 @@
   justify-content: center;
   height: 100vh;
   z-index: 100;
-  background: #e7f2fd;
+  background: linear-gradient(to top right, #bf7a6b 0%, #e6d8a7 100%);
 }
 .main h1 {
   color: #11101d;

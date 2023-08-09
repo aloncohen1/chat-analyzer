@@ -1,14 +1,16 @@
 <!-- Coding By CodingNepal - codingnepalweb.com -->
 <html lang="en">
   <head>
+      <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Whatsapp Analyzer</title>
-{#    <link rel="stylesheet" href="static/main.css" />#}
+
       <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='/main.css') }}">
     <!-- Fontawesome CDN Link -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" />
+
   </head>
   <body>
     <nav class="sidebar">
@@ -28,8 +30,24 @@
         </ul>
       </div>
     </nav>
+
     <main class="main">
+        <h1>user_level_analysis</h1>
         {{ data | safe }}
     </main>
+    <div id="plotly-plot"></div>
+
+    <script>
+        // Get the graph JSON data from the Flask template
+        var graphJSON = {{ graphJSON|safe }};
+
+        // Create the plot using graphJSON
+        Plotly.react('plotly-plot', graphJSON, {});
+    </script>
   </body>
+{#<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>#}
+{#<script type='text/javascript'>#}
+{#  var graphs = {{graphJSON | safe}};#}
+{#  Plotly.plot('chart',graphs,{});#}
+{#</script>#}
 </html>
