@@ -1,10 +1,39 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-    <h1>View Data</h1>
-    {{ data | safe }}
-</body>
+<!-- Coding By CodingNepal - codingnepalweb.com -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Whatsapp Analyzer</title>
+{#    <link rel="stylesheet" href="static/main.css" />#}
+      <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='/main.css') }}">
+    <!-- Fontawesome CDN Link -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" />
+  </head>
+  <body>
+    <nav class="sidebar">
+      <a href="#" class="logo"><center>Whatsapp Analyzer</center></a>
+      <div class="menu-content">
+        <ul class="menu-items">
+          <div class="menu-title">Sections</div>
+          <li class="item">
+            <a href="/general_statistics/{{ value }}">General Statistics</a>
+          </li>
+          <li class="item">
+            <a href="/user_level_analysis/{{ value }}">User Level Analysis</a>
+          </li>
+          <li class="item">
+            <a href="/text_analysis/{{ value }}">Text Analysis</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <nav class="navbar">
+      <i class="fa-solid fa-bars" id="sidebar-close"></i>
+    </nav>
+    <main class="main">
+        {{ data | safe }}
+    </main>
+    <script src="main.js"></script>
+  </body>
 </html>
