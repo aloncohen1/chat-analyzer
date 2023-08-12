@@ -5,7 +5,7 @@ from hashlib import md5
 from flask_session import Session
 
 from utils.whtasup_utils import plot_user_message_responses_flow, plot_monthly_activity, add_timestamps_df, \
-    get_locations_markers
+    get_locations_markers, plot_table
 
 app = Flask(__name__)
 
@@ -37,7 +37,8 @@ def user_level_analysis(filename):
 
 @app.route('/text_analysis/<filename>')
 def text_analysis(filename):
-    return render_template('text_analysis.html', data=session["data"].head().to_html(classes='data'), value=filename)
+    plot = plot_table(session['data'])
+    return render_template('text_analysis.html', graphJSON=plot, value=filename)
 
 @app.route('/geographics/<filename>')
 def geographics(filename):

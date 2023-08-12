@@ -1,6 +1,7 @@
 import pandas as pd
 from whatstk import WhatsAppChat
-from whatstk.graph import plot, FigureBuilder
+from whatstk.graph import FigureBuilder
+import plotly.graph_objects as go
 import plotly.express as px
 import plotly
 import json
@@ -38,3 +39,44 @@ def get_locations_markers(df):
     locations_df['popup'] = locations_df['username'] + ': ' + locations_df['timestamp'].astype(str)
 
     return locations_df[['lat', 'lon', 'popup']].to_dict('records')
+
+
+def plot_table(df):
+    fig = go.Figure(data=[go.Table(
+        header=dict(values=list(df.columns),
+                    # fill_color='paleturquoise',
+                    align='left'),
+        cells=dict(values=[df[i].astype(str) for i in df.columns],
+                   fill_color='lavender',
+                   align='left'))
+    ])
+    fig = add_filter_to_fig(fig,df,['username','month'])
+    return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+
+def add_filter_to_fig(fig,df, filters=['username']):
+    fig.update_layout(
+        updatemenus=[
+            {
+                "y": 1 - (i / 5),
+                "buttons": [
+                    {
+                        "label": c,
+                        "method": "restyle",
+                        "args": [
+                            {
+                                "cells": {
+                                    "values": df.T.values
+                                    if c == f"All ({menu})"
+                                    else df.loc[df[menu].eq(c)].T.values
+                                }
+                            }
+                        ],
+                    }
+                    for c in [f"All ({menu})"] + df[menu].astype(str).unique().tolist()
+                ],
+            }
+            for i, menu in enumerate(filters)
+        ]
+    )
+    return fig
