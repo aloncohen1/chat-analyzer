@@ -1,4 +1,11 @@
-var map = L.map('map').fitWorld();
+var map = L.map('map',{
+    maxZoom: 30,
+    minZoom: 12,
+    zoomControl: false
+}).fitWorld();
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+}).addTo(map);
+L.control.zoom({
+    position: 'topright'
 }).addTo(map);
