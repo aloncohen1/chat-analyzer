@@ -31,3 +31,10 @@ def plot_user_message_responses_flow(df, n_users=5):
     fig = FigureBuilder(chat=WhatsAppChat(
         df[df['username'].isin(df['username'].value_counts()[0: n_users].index)])).user_message_responses_flow()
     return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+def get_locations_markers(df):
+    locations_df = df[df['message'].str.contains('location:')]
+    locations_df['lat'], locations_df['lon'] = zip(*locations_df['message'].apply(lambda x: x.split('=')[1].split(',')))
+    locations_df['popup'] = locations_df['username'] + ': ' + locations_df['timestamp'].astype(str)
+
+    return locations_df[['lat', 'lon', 'popup']].to_dict('records')

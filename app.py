@@ -4,7 +4,8 @@ from whatstk import df_from_txt_whatsapp
 from hashlib import md5
 from flask_session import Session
 
-from utils.whtasup_utils import plot_user_message_responses_flow, plot_monthly_activity, add_timestamps_df
+from utils.whtasup_utils import plot_user_message_responses_flow, plot_monthly_activity, add_timestamps_df, \
+    get_locations_markers
 
 app = Flask(__name__)
 
@@ -24,25 +25,26 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-
-
-@app.route(f'/general_statistics/<filename>')
+@app.route('/general_statistics/<filename>')
 def general_statistics(filename):
     plot = plot_monthly_activity(session['data'])
     return render_template('general_statistics.html', graphJSON=plot, value=filename)
 
-@app.route(f'/user_level_analysis/<filename>')
+@app.route('/user_level_analysis/<filename>')
 def user_level_analysis(filename):
     plot = plot_user_message_responses_flow(session['data'])
     return render_template('user_level_analysis.html', graphJSON=plot, value=filename)
 
-@app.route(f'/text_analysis/<filename>')
+@app.route('/text_analysis/<filename>')
 def text_analysis(filename):
     return render_template('text_analysis.html', data=session["data"].head().to_html(classes='data'), value=filename)
 
-@app.route('/about/')
-def about():
-    return "About"
+@app.route('/geographics/<filename>')
+def geographics(filename):
+
+    markers = get_locations_markers(session['data'])
+
+    return render_template('geographics.html', markers=markers, value=filename)
 
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():

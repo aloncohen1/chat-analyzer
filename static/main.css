@@ -120,8 +120,17 @@
   z-index: 100;
   background: linear-gradient(to top right, #bf7a6b 0%, #e6d8a7 100%);
 }
+
 .main h1 {
   color: #11101d;
   font-size: 40px;
   text-align: center;
+}
+
+.map-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 50%;
+  height: 50%;
 }
