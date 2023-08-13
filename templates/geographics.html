@@ -44,10 +44,14 @@
 <script>
 {% for marker in markers %}
 L.marker([{{ marker['lat'] }}, {{ marker['lon'] }}]).addTo(map)
-.bindPopup("{{ marker['popup'] }}")
+.bindPopup(`
+        <div class="popup-content">
+            {{ marker['popup'] | safe }}
+        </div>`, {maxWidth : 900},{maxHeight:900})
 .openPopup();
 {% endfor %}
 </script>
+
     </main>
   </body>
 </html>

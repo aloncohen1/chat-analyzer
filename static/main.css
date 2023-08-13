@@ -131,6 +131,28 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 50%;
-  height: 50%;
+  width: 80%;
+  height: 80%;
 }
+
+.popup-content {
+        max-width: 600px;
+        max-height: 600px;
+        overflow: auto;
+        padding: 10px;
+        background-color: white;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    /* Styles for the HTML table */
+    .popup-content table {
+        font-size: 12px; /* Adjust the font size */
+        border-collapse: collapse; /* Collapse cell borders */
+        width: 100%; /* Fill available width */
+    }
+
+    .popup-content th, .popup-content td {
+        padding: 4px 8px; /* Adjust cell padding */
+        border: 1px solid #ccc; /* Add cell borders */
+    }

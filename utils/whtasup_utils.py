@@ -5,6 +5,8 @@ import plotly.graph_objects as go
 import plotly.express as px
 import plotly
 import json
+import re
+from dash import dcc
 
 
 def add_timestamps_df(df):
@@ -26,6 +28,7 @@ def plot_monthly_activity(df):
                   x="month", y="n_message", title='messages count over time')
     fig.update_layout(paper_bgcolor="rgba(255,255,255,0.5)", plot_bgcolor="rgba(255,255,255,0.5)",
                       height=900, width=1200)
+
     return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
 
@@ -39,10 +42,30 @@ def plot_user_message_responses_flow(df, n_users=5):
 
 def get_locations_markers(df):
     locations_df = df[df['message'].str.contains('location:')]
-    locations_df['lat'], locations_df['lon'] = zip(*locations_df['message'].apply(lambda x: x.split('=')[1].split(',')))
-    locations_df['popup'] = locations_df['username'] + ': ' + locations_df['timestamp'].astype(str)
+    if not locations_df.empty:
+        locations_df['lat'], locations_df['lon'] = zip(*locations_df['message'].apply(lambda x: x.split('=')[1].split(',')))
 
-    return locations_df[['lat', 'lon', 'popup']].to_dict('records')
+        relevant_indexes = [list(locations_df.index),
+                            list(locations_df.index + 1),
+                            list(locations_df.index - 1)]
+
+        loc_df = df.drop(['hour', 'date', 'month', 'year'], axis=1) \
+            .loc[set().union(*relevant_indexes)].sort_index() \
+            .merge(pd.DataFrame(zip(*relevant_indexes),
+                                index=list(locations_df.index)) \
+                   .melt(ignore_index=False).reset_index() \
+                       [['index', 'value']], left_index=True, right_on='value') \
+            .drop('value', axis=1)
+
+        html_list = []
+        for index, temp_df in loc_df.groupby('index'):
+            html_list.append({'index': index, "popup": temp_df[['username', 'timestamp', 'message']].to_html(index=False)})
+        locations_df = locations_df.merge(pd.DataFrame(html_list), left_index=True, right_on='index')
+
+        return locations_df[['lat', 'lon', 'popup']].to_dict('records')
+
+    else:
+        return pd.DataFrame(data=[],columns=['lat', 'lon', 'popup']).to_dict('records')
 
 
 def plot_table(df):
