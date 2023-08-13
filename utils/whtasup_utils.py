@@ -8,6 +8,8 @@ import json
 import re
 from dash import dcc
 
+URL_PATTERN = r"(https:\/\/maps\.google\.com\/\?q=-?\d+\.\d+,-?\d+\.\d+)"
+
 
 def add_timestamps_df(df):
 
@@ -41,9 +43,10 @@ def plot_user_message_responses_flow(df, n_users=5):
     return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
 def get_locations_markers(df):
-    locations_df = df[df['message'].str.contains('location:')]
+    locations_df = df[df['message'].str.contains('maps.google')]
     if not locations_df.empty:
-        locations_df['lat'], locations_df['lon'] = zip(*locations_df['message'].apply(lambda x: x.split('=')[1].split(',')))
+        locations_df['lat'], locations_df['lon'] = zip(*locations_df['message'].str.extract(URL_PATTERN)[0]\
+                                                       .apply(lambda x: x.split('=')[1].split(',')))
 
         relevant_indexes = [list(locations_df.index),
                             list(locations_df.index + 1),
