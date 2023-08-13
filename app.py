@@ -4,6 +4,7 @@ from whatstk import df_from_txt_whatsapp
 from hashlib import md5
 from flask_session import Session
 
+
 from utils.whtasup_utils import plot_user_message_responses_flow, plot_monthly_activity, add_timestamps_df, \
     get_locations_markers, plot_table
 
@@ -14,8 +15,7 @@ app.config["SESSION_TYPE"] = "filesystem"
 
 Session(app)
 
-UPLOAD_FOLDER = '/home/aloncohen/whatsapp-analyzer/data'
-# UPLOAD_FOLDER = '/Users/aloncohen/private_repos/whatsapp-analyzer/data'
+UPLOAD_FOLDER = './data'
 
 ALLOWED_EXTENSIONS = {'txt'}
 
