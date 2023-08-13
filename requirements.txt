@@ -1,4 +1,4 @@
 dash
 flask-session
 whatstk
-
+gunicorn==19.7.1
