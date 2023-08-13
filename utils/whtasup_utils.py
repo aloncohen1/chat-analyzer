@@ -7,12 +7,12 @@ import plotly
 import json
 
 
-
 def add_timestamps_df(df):
 
     df['timestamp'] = pd.to_datetime(df['date'])
-    df['hour'] = df['timestamp'].dt.hour
+    df['year'] = df['timestamp'].dt.year
     df['date'] = df['timestamp'].dt.date
+    df['hour'] = df['timestamp'].dt.hour
     df['month'] = df.timestamp.dt.to_period('M').dt.to_timestamp()
 
     return df
@@ -24,6 +24,8 @@ def get_hourly_activity(df):
 def plot_monthly_activity(df):
     fig = px.line(df.groupby('month', as_index=False).agg(n_message=('username', 'count')),
                   x="month", y="n_message", title='messages count over time')
+    fig.update_layout(paper_bgcolor="rgba(255,255,255,0.5)", plot_bgcolor="rgba(255,255,255,0.5)",
+                      height=900, width=1200)
     return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
 
@@ -31,6 +33,8 @@ def plot_monthly_activity(df):
 def plot_user_message_responses_flow(df, n_users=5):
     fig = FigureBuilder(chat=WhatsAppChat(
         df[df['username'].isin(df['username'].value_counts()[0: n_users].index)])).user_message_responses_flow()
+    fig.update_layout(paper_bgcolor="rgba(255,255,255,0.5)", plot_bgcolor="rgba(255,255,255,0.5)",
+                      height=900, width=1200)
     return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
 def get_locations_markers(df):
@@ -44,13 +48,14 @@ def get_locations_markers(df):
 def plot_table(df):
     fig = go.Figure(data=[go.Table(
         header=dict(values=list(df.columns),
-                    # fill_color='paleturquoise',
                     align='left'),
         cells=dict(values=[df[i].astype(str) for i in df.columns],
                    fill_color='lavender',
                    align='left'))
     ])
-    fig = add_filter_to_fig(fig,df,['username','month'])
+    fig.update_layout(paper_bgcolor="rgba(255,255,255,0.5)", plot_bgcolor="rgba(255,255,255,0.5)",
+                      height=900, width=1200)
+    fig = add_filter_to_fig(fig, df, ['username', 'year', 'month'])
     return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
 
@@ -58,7 +63,7 @@ def add_filter_to_fig(fig,df, filters=['username']):
     fig.update_layout(
         updatemenus=[
             {
-                "y": 1 - (i / 5),
+                "y": 1 - (i / 15),
                 "buttons": [
                     {
                         "label": c,
