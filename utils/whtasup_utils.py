@@ -21,11 +21,19 @@ def add_timestamps_df(df):
 
     return df
 
-def get_hourly_activity(df):
+def get_hourly_activity_plot(df):
 
-    return df.groupby('hour', as_index=False).agg(n_message=('username', 'count'))
+    fig = px.bar(df['timestamp'].dt.floor('h').dt.strftime("%H:%M")\
+                 .value_counts(normalize=True).sort_index().reset_index()\
+                 .rename(columns={'timestamp': '% of Activity',
+                                  'index': 'Hour of day'}),
+                 x="Hour of day", y="% of Activity", title='n_message')
+    fig.layout.yaxis.tickformat = ',.1%'
 
-def plot_monthly_activity(df):
+    return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+
+def plot_monthly_activity_plot(df):
     fig = px.line(df.groupby('month', as_index=False).agg(n_message=('username', 'count')),
                   x="month", y="n_message", title='messages count over time')
     fig.update_layout(paper_bgcolor="rgba(255,255,255,0.5)", plot_bgcolor="rgba(255,255,255,0.5)",

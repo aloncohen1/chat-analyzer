@@ -1,12 +1,13 @@
-import os
+
 from flask import Flask, render_template, request, redirect, url_for, session
+from flask_session import Session
+import os
 from whatstk import df_from_txt_whatsapp
 from hashlib import md5
-from flask_session import Session
+from random import choice
 
-
-from utils.whtasup_utils import plot_user_message_responses_flow, plot_monthly_activity, add_timestamps_df, \
-    get_locations_markers, plot_table
+from utils.whtasup_utils import plot_user_message_responses_flow, plot_monthly_activity_plot, add_timestamps_df, \
+    get_locations_markers, plot_table, get_hourly_activity_plot
 
 app = Flask(__name__)
 
@@ -24,9 +25,12 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+def random_string(n):
+    return ''.join([choice('qwertyuiopasdfghjklzxcvbnm') for _ in range(n)]).encode()
+
 @app.route('/general_statistics/<filename>')
 def general_statistics(filename):
-    plot = plot_monthly_activity(session['data'])
+    plot = get_hourly_activity_plot(session['data'])
     return render_template('general_statistics.html', graphJSON=plot, value=filename)
 
 @app.route('/user_level_analysis/<filename>')
@@ -58,9 +62,10 @@ def upload_file():
             return redirect(request.url)
 
         if file and allowed_file(file.filename):
-            filename = os.path.join(app.config['UPLOAD_FOLDER'], md5(file.filename.encode()).hexdigest()+'.txt')
+            rand_s = random_string(5)
+            filename = os.path.join(app.config['UPLOAD_FOLDER'], md5(file.filename.encode() + rand_s).hexdigest()+'.txt')
             file.save(filename)
-            return redirect(url_for('view_data', filename=md5(file.filename.encode()).hexdigest()+'.txt'))
+            return redirect(url_for('view_data', filename=md5(file.filename.encode() + rand_s).hexdigest()+'.txt'))
 
     return render_template('upload.html')
 
