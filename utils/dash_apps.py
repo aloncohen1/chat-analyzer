@@ -14,7 +14,7 @@ def table_das_app(server, url_base_pathname='/dash/'):
     @app.server.before_request
     def before_request():
 
-        df = session['data']
+        df = session.get('data')
         app.layout = html.Div([
 
             dcc.Dropdown(
@@ -42,7 +42,7 @@ def table_das_app(server, url_base_pathname='/dash/'):
         [Input('username-dropdown', 'value')]
     )
     def update_plots(selected_username):
-        df = session['data']
+        df = session.get('data')
         if selected_username:
             filtered_df = df[df['username'].isin(selected_username)]
         else:
