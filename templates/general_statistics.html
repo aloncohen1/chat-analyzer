@@ -34,15 +34,29 @@
       </div>
     </nav>
     <main class="main">
-        <div id="plotly-plot"></div>
+{#        <iframe src="/dash/" height="900" width="1700" frameBorder="0" style="position:fixed; top:0; left:100px; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;"></iframe>#}
+        <iframe src="/dash/" height="950" width="1700" frameBorder="0"></iframe>
+{#        <div class="plot-container">#}
+{#            <div id="plotly-graph-1"></div>#}
+{##}
+{#        </div>#}
+{#        <div class="plot-container">#}
+{#            <div id="plotly-graph-2"></div>#}
+{##}
+{#        </div>#}
 
-    <script>
-        // Get the graph JSON data from the Flask template
-        var graphJSON = {{ graphJSON|safe }};
-
-        // Create the plot using graphJSON
-        Plotly.react('plotly-plot', graphJSON, {});
-    </script>
     </main>
+{#      <script>#}
+{#        // Get the graph JSON data from the Flask template#}
+{#        var graphJSON = {{ graph_a|safe }};#}
+{##}
+{#        // Create the plot using graphJSON#}
+{#        Plotly.react('plotly-graph-1', graphJSON, {});#}
+{##}
+{#                var graphJSON = {{ graph_b|safe }};#}
+{##}
+{#        // Create the plot using graphJSON#}
+{#        Plotly.react('plotly-graph-2', graphJSON, {});#}
+{#    </script>#}
   </body>
 </html>

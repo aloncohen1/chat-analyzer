@@ -5,10 +5,19 @@ import plotly.graph_objects as go
 import plotly.express as px
 import plotly
 import json
+from random import choice
 import re
 from dash import dcc
 
 URL_PATTERN = r"(https:\/\/maps\.google\.com\/\?q=-?\d+\.\d+,-?\d+\.\d+)"
+
+ALLOWED_EXTENSIONS = {'txt'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def random_string(n):
+    return ''.join([choice('qwertyuiopasdfghjklzxcvbnm') for _ in range(n)]).encode()
 
 
 def add_timestamps_df(df):
@@ -16,19 +25,20 @@ def add_timestamps_df(df):
     df['timestamp'] = pd.to_datetime(df['date'])
     df['year'] = df['timestamp'].dt.year
     df['date'] = df['timestamp'].dt.date
-    df['hour'] = df['timestamp'].dt.hour
+    df['hour'] = df['timestamp'].dt.floor('h').dt.strftime("%H:%M")
     df['month'] = df.timestamp.dt.to_period('M').dt.to_timestamp()
 
     return df
 
 def get_hourly_activity_plot(df):
 
-    fig = px.bar(df['timestamp'].dt.floor('h').dt.strftime("%H:%M")\
-                 .value_counts(normalize=True).sort_index().reset_index()\
-                 .rename(columns={'timestamp': '% of Activity',
+    fig = px.bar(df['hour'].value_counts(normalize=True).sort_index().reset_index()\
+                 .rename(columns={'hour': '% of Activity',
                                   'index': 'Hour of day'}),
                  x="Hour of day", y="% of Activity", title='n_message')
     fig.layout.yaxis.tickformat = ',.1%'
+    fig.update_xaxes(tickangle=60)
+    fig.update_layout(paper_bgcolor="rgba(255,255,255,0.5)", plot_bgcolor="rgba(255,255,255,0.5)")
 
     return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
@@ -36,8 +46,8 @@ def get_hourly_activity_plot(df):
 def plot_monthly_activity_plot(df):
     fig = px.line(df.groupby('month', as_index=False).agg(n_message=('username', 'count')),
                   x="month", y="n_message", title='messages count over time')
-    fig.update_layout(paper_bgcolor="rgba(255,255,255,0.5)", plot_bgcolor="rgba(255,255,255,0.5)",
-                      height=900, width=1200)
+    fig.update_layout(paper_bgcolor="rgba(255,255,255,0.5)", plot_bgcolor="rgba(255,255,255,0.5)")
+                      #,height=900, width=1200)
 
     return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
