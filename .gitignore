@@ -1,0 +1,8 @@
+*.pb
+*.pyc
+*.xml
+*.pyc
+*idea/*
+*flas
+flask_session/
+
