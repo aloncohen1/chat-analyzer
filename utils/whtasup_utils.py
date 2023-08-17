@@ -6,8 +6,7 @@ import plotly.express as px
 import plotly
 import json
 from random import choice
-import re
-from dash import dcc
+import numpy as np
 
 URL_PATTERN = r"(https:\/\/maps\.google\.com\/\?q=-?\d+\.\d+,-?\d+\.\d+)"
 
@@ -27,6 +26,8 @@ def add_timestamps_df(df):
     df['date'] = df['timestamp'].dt.date
     df['hour'] = df['timestamp'].dt.floor('h').dt.strftime("%H:%M")
     df['month'] = df.timestamp.dt.to_period('M').dt.to_timestamp()
+    df['epoch_dt'] = (df['month'].astype(np.int64) // 1e9).astype(int)
+    df['month'] = df['month'].astype(str)
 
     return df
 

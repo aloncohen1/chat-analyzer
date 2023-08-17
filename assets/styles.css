@@ -1,0 +1,12 @@
+.sidebar {
+    background-color: #f8f9fa;
+    height: 100vh;
+    padding: 20px;
+}
+
+.main-container {
+    padding: 20px;
+    border-left: 1px solid #ddd;
+    height: 100vh;
+    overflow-y: auto;
+}

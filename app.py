@@ -20,8 +20,6 @@ UPLOAD_FOLDER = './data'
 
 server.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-app = table_das_app(server)
-
 
 @server.route('/general_statistics/<filename>')
 def general_statistics(filename):
@@ -87,6 +85,7 @@ def view_data(filename):
     except Exception as e:
         return f"Error: {e}"
 
+app = table_das_app(server)
 
 if __name__ == '__main__':
     server.run(debug=True)
