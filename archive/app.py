@@ -5,8 +5,8 @@ import os
 from whatstk import df_from_txt_whatsapp
 from hashlib import md5
 
-from utils.dash_apps import table_das_app
-from utils.whtasup_utils import plot_user_message_responses_flow, plot_monthly_activity_plot, add_timestamps_df, \
+from archive.dash_apps import table_das_app
+from archive.whtasup_utils import plot_user_message_responses_flow, plot_monthly_activity_plot, add_timestamps_df, \
     get_locations_markers, plot_table, get_hourly_activity_plot, allowed_file, random_string
 
 server = Flask(__name__)
@@ -28,24 +28,24 @@ def general_statistics(filename):
     graph_a, graph_b = plot_monthly_activity_plot(session["data"]), get_hourly_activity_plot(session["data"])
 
 
-    return render_template('general_statistics.html', graph_a=graph_a,graph_b=graph_b, value=filename)
+    return render_template('templates/general_statistics.html', graph_a=graph_a, graph_b=graph_b, value=filename)
 
 @server.route('/user_level_analysis/<filename>')
 def user_level_analysis(filename):
     plot = plot_user_message_responses_flow(session['data'])
-    return render_template('user_level_analysis.html', graphJSON=plot, value=filename)
+    return render_template('templates/user_level_analysis.html', graphJSON=plot, value=filename)
 
 @server.route('/text_analysis/<filename>')
 def text_analysis(filename):
     plot = plot_table(session['data'])
-    return render_template('text_analysis.html', graphJSON=plot, value=filename)
+    return render_template('templates/text_analysis.html', graphJSON=plot, value=filename)
 
 @server.route('/geographics/<filename>')
 def geographics(filename):
 
     markers = get_locations_markers(session['data'])
 
-    return render_template('geographics.html', markers=markers, value=filename)
+    return render_template('templates/geographics.html', markers=markers, value=filename)
 
 @server.route('/', methods=['GET', 'POST'])
 def upload_file():
@@ -64,7 +64,7 @@ def upload_file():
             file.save(filename)
             return redirect(url_for('view_data', filename=md5(file.filename.encode() + rand_s).hexdigest()+'.txt'))
 
-    return render_template('upload.html')
+    return render_template('templates/upload.html')
 
 
 @server.route('/view/<filename>')
@@ -81,7 +81,7 @@ def view_data(filename):
 
         graph_a, graph_b = plot_monthly_activity_plot(session["data"]), get_hourly_activity_plot(session["data"])
 
-        return render_template('general_statistics.html', graph_a=graph_a, graph_b=graph_b, value=filename)
+        return render_template('templates/general_statistics.html', graph_a=graph_a, graph_b=graph_b, value=filename)
     except Exception as e:
         return f"Error: {e}"
 
