@@ -11,8 +11,8 @@ def local_css(file_name):
 
 st.set_page_config(layout="wide")
 def generate_monthly_activity(df):
-    fig = px.line(df.groupby('month', as_index=False).agg(n_message=('username', 'count')),
-                  x='month', y='n_message')
+    fig = px.line(df.groupby('month', as_index=False).agg({'username': 'count'})\
+                  .rename(columns={'username': '# of Messages'}), x='month', y='# of Messages')
     fig['data'][0]['line']['color'] = "#24d366"
     fig.update_layout(title_text='Chat Activity Over Time')
     fig.update_layout(paper_bgcolor="rgba(18,32,43)", plot_bgcolor="rgba(18,32,43)")
@@ -108,18 +108,15 @@ def main():
         col2.metric("Overall Messages", f"{filtered_df.shape[0]:,}")
         col3.metric("Active Days", f"{filtered_df['date'].nunique():,}")
 
-        # st.markdown(f"""<p style="background-color:#0b141a;font-size:50px;text-align:center;">{filtered_df['username'].nunique():,}</p> """,
-        #             unsafe_allow_html=True)
-
         col4, col5 = st.columns((6, 10))
 
-        col4.plotly_chart(generate_piechart(filtered_df),use_container_width=True)
-        col5.plotly_chart(generate_monthly_activity(filtered_df),use_container_width=True)
+        col4.plotly_chart(generate_piechart(filtered_df), use_container_width=True)
+        col5.plotly_chart(generate_monthly_activity(filtered_df), use_container_width=True)
 
         col6, col7 = st.columns((6, 10))
 
         col6.plotly_chart(generate_weekly_activity(filtered_df), use_container_width=True)
-        col7.plotly_chart(generate_hourly_activity(filtered_df),use_container_width=True)
+        col7.plotly_chart(generate_hourly_activity(filtered_df), use_container_width=True)
 
 
 # Run the app
