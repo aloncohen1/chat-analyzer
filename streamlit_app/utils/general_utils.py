@@ -11,11 +11,27 @@ import numpy as np
 
 URL_PATTERN = r"(https:\/\/maps\.google\.com\/\?q=-?\d+\.\d+,-?\d+\.\d+)"
 
+def add_logo():
+    st.markdown(
+        """
+        <style>
+            [data-testid="stSidebarNav"]::before {
+                content: "WhatsappAnalyzer";
+                font-family: sans-serif;
+                margin-left: 20px;
+                margin-top: -300%;
+                font-size: 30px;
+            }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
 def refer_to_load_data_section():
     st.title("Please Upload Data to Analyze")
     upload_data = st.button("Take me to uploading data page!")
     if upload_data:
-        switch_page("hello")
+        switch_page("home")
 
 def set_background():
     page_bg_img = '''
@@ -37,6 +53,7 @@ def add_timestamps_df(df):
     df['month'] = df.timestamp.dt.to_period('M').dt.to_timestamp()
     df['epoch_dt'] = (df['month'].astype(np.int64) // 1e9).astype(int)
     df['month'] = df['month'].astype(str)
+    df['day_name'] = df['timestamp'].dt.day_name()
 
     return df
 

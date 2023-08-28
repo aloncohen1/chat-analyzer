@@ -2,7 +2,7 @@ from streamlit_extras.switch_page_button import switch_page
 
 import streamlit as st
 from whatstk.whatsapp.parser import _df_from_str
-from utils.general_utils import add_timestamps_df, set_background
+from utils.general_utils import add_timestamps_df, set_background, add_logo
 
 #
 # st.set_page_config(
@@ -18,10 +18,12 @@ def load_data(file):
         st.session_state['data'] = df
 
 
+
 def main():
     set_background()
 
-    st.title("WhatsApp Group Chat Analyzer")
+    add_logo()
+    st.title("WhatsApp Chat Group Analyzer")
 
     test_holder = st.empty()
     test_holder.header("Upload Data")
@@ -44,11 +46,11 @@ def main():
 
         general_statistics = st.button("Get General Statistics")
         if general_statistics:
-            switch_page("basic_statistics")
+            switch_page("basic statistics")
 
         user_level_analysis = st.button("Get User Level Analysis")
         if user_level_analysis:
-            switch_page("user_level_analysis")
+            switch_page("user level analysis'")
 
         geographics = st.button("Get Geographics Analysis")
         if geographics:
