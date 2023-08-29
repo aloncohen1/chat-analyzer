@@ -1,0 +1,5 @@
+div[data-testid="stHorizontalBlock"] {
+  font-size: 12px; /* Adjust the font size */
+  border-collapse: collapse; /* Collapse cell borders */
+  width: 100%; /* Fill available width */
+}

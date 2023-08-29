@@ -1,10 +1,12 @@
 import streamlit as st
 
-from utils.general_utils import refer_to_load_data_section, set_background, add_logo
+from utils.general_utils import refer_to_load_data_section, set_background, add_logo, add_filters
+from utils.graphs_utils import generate_message_responses_flow
 
 
 def main():
 
+    st.set_page_config(layout="wide")
     set_background()
     add_logo()
 
@@ -13,16 +15,10 @@ def main():
 
     else:
 
-        # Sidebar navigation
-        section = st.sidebar.radio("Navigate", ("Main App", "Section A", "Section B", "Section C"))
-
-        if section == "Main App":
-
-                st.header("Data Preview")
-                st.write(st.session_state['data'].head())
-
-        elif section in ("Section A", "Section B", "Section C"):
-            st.header(section)
+        filtered_df = add_filters()
+        col0, col1 = st.columns((6, 10))
+        with col0:
+            st.plotly_chart(generate_message_responses_flow(filtered_df),use_container_width=True)
             # You can create a similar template for each section as the main app
 
 

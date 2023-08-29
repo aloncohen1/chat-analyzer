@@ -13,11 +13,8 @@ from utils.general_utils import add_timestamps_df, set_background, add_logo
 def load_data(file):
     df = _df_from_str(file.read().decode())
     df = add_timestamps_df(df)
-
-    if 'data' not in st.session_state:
-        st.session_state['data'] = df
-
-
+    st.session_state['data'] = df
+    
 
 def main():
     set_background()
@@ -50,7 +47,7 @@ def main():
 
         user_level_analysis = st.button("Get User Level Analysis")
         if user_level_analysis:
-            switch_page("user level analysis'")
+            switch_page("user level analysis")
 
         geographics = st.button("Get Geographics Analysis")
         if geographics:

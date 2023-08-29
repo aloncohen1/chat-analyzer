@@ -1,3 +1,7 @@
 whatstk
+pygeohash
 streamlit
 streamlit-extras
+streamlit-folium
+folium
+
