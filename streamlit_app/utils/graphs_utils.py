@@ -1,7 +1,13 @@
 import pandas as pd
+import streamlit as st
 import plotly.express as px
+import plotly.graph_objects as go
 from whatstk import WhatsAppChat
 from whatstk.graph import FigureBuilder
+
+DAYS_ORDER = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+
+HOURS_ORDER = pd.date_range('1970-01-01', '1970-01-02', freq='H').strftime("%H:%M")
 
 def generate_piechart(df,top_n=10, metric="Messages"):
 
@@ -26,13 +32,12 @@ def generate_piechart(df,top_n=10, metric="Messages"):
     return fig
 
 
-def generate_activity_overtime(df, granularity='month'):
+def generate_activity_overtime(df, min_date, max_date, granularity='month'):
 
     freq_dict = {'date': '1D', 'month': 'MS', 'week': 'W-MON'}
 
     agg_df = df.groupby(granularity).agg({'username': 'count'}) \
-        .reindex(pd.date_range(df[granularity].min(), df[granularity].max(),
-                               freq=freq_dict[granularity]), fill_value=0).reset_index() \
+        .reindex(pd.date_range(min_date, max_date, freq=freq_dict[granularity]), fill_value=0).reset_index() \
         .rename(columns={'username': '# of Messages', 'index': granularity.capitalize()})
 
     fig = px.line(agg_df, x=granularity.capitalize(), y='# of Messages')
@@ -62,9 +67,14 @@ def generate_hourly_activity(df):
 
 def generate_weekly_activity(df):
 
-    days_order = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    agg_df = df['day_name'].value_counts(normalize=True)
 
-    fig = px.bar(df['day_name'].value_counts(normalize=True)[days_order].reset_index()\
+    missing_days = set(DAYS_ORDER) - set(agg_df.index)
+    if len(missing_days) > 0:
+        agg_df = pd.concat([agg_df, pd.Series(data=[0]*len(missing_days),
+                                             index=missing_days, name='day_name')])
+
+    fig = px.bar(agg_df[DAYS_ORDER].reset_index()\
                  .rename(columns={'day_name': '% of Activity',
                                   'index': 'Day of Week'}),
                  x="Day of Week", y="% of Activity")
@@ -78,6 +88,26 @@ def generate_weekly_activity(df):
 
     return fig
 
+
+def generate_activity_matrix(df):
+
+    matrix_df = df.groupby(['day_name', 'hour'], as_index=False).agg(n_message=('username', 'count')) \
+        .rename(columns={'day_name': 'Day',
+                         'hour': 'Hour'})\
+        .pivot(index='Day', columns='Hour', values='n_message').fillna(0).reindex(DAYS_ORDER) / len(df)
+
+    fig = go.Figure(data=go.Heatmap(
+        z=matrix_df.values,
+        x=matrix_df.columns,
+        y=matrix_df.index,
+        colorscale=[[0, "#ffffff"], [1, '#24d366']], showscale=False,
+        hovertemplate="Day: %{y}<br>Hour: %{x}<br>% of Messages: %{z:.2%}",
+        name=""))
+
+    fig.update_layout(title='Message Distribution by Day and Hour',
+                      xaxis_title='Hour', yaxis_title='Day', coloraxis_showscale=False)
+
+    return fig
 
 def generate_message_responses_flow(df, n_users=5):
     fig = FigureBuilder(chat=WhatsAppChat(

@@ -80,14 +80,7 @@ def add_filters():
     else:
         filtered_df = st.session_state['data'][st.session_state['data']['username'].isin(users_filter)]
 
-    return filtered_df[filtered_df['date'].between(time_filter[0], time_filter[1])]
-
-def plot_user_message_responses_flow(df, n_users=5):
-    fig = FigureBuilder(chat=WhatsAppChat(
-        df[df['username'].isin(df['username'].value_counts()[0: n_users].index)])).user_message_responses_flow()
-    fig.update_layout(paper_bgcolor="rgba(255,255,255,0.5)", plot_bgcolor="rgba(255,255,255,0.5)",
-                      height=900, width=1200)
-    return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+    return filtered_df[filtered_df['date'].between(time_filter[0], time_filter[1])], time_filter[0], time_filter[1]
 
 def get_locations_markers(df):
     locations_df = df[df['message'].str.contains('maps.google')]

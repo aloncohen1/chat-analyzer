@@ -17,7 +17,7 @@ def main():
         refer_to_load_data_section()
 
     else:
-        filtered_df = add_filters()
+        filtered_df, min_date, max_date = add_filters()
 
         locations_df = get_locations_markers(filtered_df)
 

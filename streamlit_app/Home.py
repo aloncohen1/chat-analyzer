@@ -1,3 +1,5 @@
+from time import sleep
+
 from streamlit_extras.switch_page_button import switch_page
 
 import streamlit as st
@@ -14,7 +16,7 @@ def load_data(file):
     df = _df_from_str(file.read().decode())
     df = add_timestamps_df(df)
     st.session_state['data'] = df
-    
+
 
 def main():
     set_background()
@@ -40,26 +42,28 @@ def main():
         how_to_holder.empty()
         st.write("Chat Uploaded Successfully!")
         # st.header("Chat Uploaded Successfully!")
-
-        general_statistics = st.button("Get General Statistics")
-        if general_statistics:
-            switch_page("basic statistics")
-
-        user_level_analysis = st.button("Get User Level Analysis")
-        if user_level_analysis:
-            switch_page("user level analysis")
-
-        geographics = st.button("Get Geographics Analysis")
-        if geographics:
-            switch_page("geographics")
-
-        st.download_button(
-            "Press to Download as CSV",
-            st.session_state['data'].to_csv(index=False),
-            "file.csv",
-            "text/csv",
-            key='download-csv'
-        )
+        sleep(2)
+        switch_page("basic statistics")
+        #
+        # general_statistics = st.button("Get General Statistics")
+        # if general_statistics:
+        #     switch_page("basic statistics")
+        #
+        # user_level_analysis = st.button("Get User Level Analysis")
+        # if user_level_analysis:
+        #     switch_page("user level analysis")
+        #
+        # geographics = st.button("Get Geographics Analysis")
+        # if geographics:
+        #     switch_page("geographics")
+        #
+        # st.download_button(
+        #     "Press to Download as CSV",
+        #     st.session_state['data'].to_csv(index=False),
+        #     "file.csv",
+        #     "text/csv",
+        #     key='download-csv'
+        # )
 
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@
 import streamlit as st
 from utils.general_utils import refer_to_load_data_section, set_background, add_logo, add_filters, local_css
 from utils.graphs_utils import generate_piechart, generate_activity_overtime, generate_weekly_activity, \
-    generate_hourly_activity
+    generate_hourly_activity, generate_activity_matrix
 
 
 def main():
@@ -16,7 +16,7 @@ def main():
 
     else:
 
-        filtered_df = add_filters()
+        filtered_df, min_date, max_date = add_filters()
 
         st.markdown(local_css("streamlit_app/streamlit/styles/metrics.css"), unsafe_allow_html=True)
 
@@ -30,14 +30,16 @@ def main():
         col4.plotly_chart(generate_piechart(filtered_df), use_container_width=True)
         with col5:
             tab_0, tab_1, tab_2 = st.tabs(["Monthly", "Weekly", "Daily"])
-            tab_0.plotly_chart(generate_activity_overtime(filtered_df, "month"), use_container_width=True)
-            tab_1.plotly_chart(generate_activity_overtime(filtered_df, 'week'), use_container_width=True)
-            tab_2.plotly_chart(generate_activity_overtime(filtered_df, 'date'), use_container_width=True)
+            tab_0.plotly_chart(generate_activity_overtime(filtered_df, min_date, max_date, "month"), use_container_width=True)
+            tab_1.plotly_chart(generate_activity_overtime(filtered_df, min_date, max_date, 'week'), use_container_width=True)
+            tab_2.plotly_chart(generate_activity_overtime(filtered_df, min_date, max_date, 'date'), use_container_width=True)
 
         col6, col7 = st.columns((6, 10))
 
         col6.plotly_chart(generate_weekly_activity(filtered_df), use_container_width=True)
         col7.plotly_chart(generate_hourly_activity(filtered_df), use_container_width=True)
+
+        st.plotly_chart(generate_activity_matrix(filtered_df), use_container_width=True)
 
 
 # Run the app

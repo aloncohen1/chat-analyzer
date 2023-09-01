@@ -15,7 +15,7 @@ def main():
 
     else:
 
-        filtered_df = add_filters()
+        filtered_df, min_date, max_date = add_filters()
         col0, col1 = st.columns((6, 10))
         with col0:
             st.plotly_chart(generate_message_responses_flow(filtered_df),use_container_width=True)
