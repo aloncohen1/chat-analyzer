@@ -109,7 +109,7 @@ def generate_activity_matrix(df):
 
     return fig
 
-def generate_message_responses_flow(df, n_users=5):
+def generate_message_responses_flow(df, n_users=7):
     fig = FigureBuilder(chat=WhatsAppChat(
         df[df['username'].isin(df['username'].value_counts()[0: n_users].index)])).user_message_responses_flow()
     fig.update_layout(paper_bgcolor="rgba(18,32,43)", plot_bgcolor="rgba(18,32,43)")
