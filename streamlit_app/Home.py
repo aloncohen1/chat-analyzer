@@ -37,9 +37,9 @@ def main():
     add_logo()
     st.title("Chat Group Analyzer")
 
-    test_holder = st.empty()
-    test_holder.header("Upload Data")
-    test_holder.write("Supports Whatsapp (.txt) / Telegram (.html)")
+    home_holder = st.empty()
+    home_holder.header("Upload Data")
+    home_holder.write("Supports Whatsapp (.txt) / Telegram (.html)")
 
     uploading_holder = st.empty()
     uploaded_file = uploading_holder.file_uploader("Choose a TXT / HTML file/s", type=["txt", "html"],
@@ -62,12 +62,12 @@ def main():
         col3.markdown('[![Foo](https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Telegram_2019_Logo.svg/242px-Telegram_2019_Logo.svg.png)](https://telegram.org/blog/export-and-more)')
 
     if uploaded_file:
-
-        load_data(uploaded_file)
-        uploading_holder.empty()
-        test_holder.empty()
+        home_holder.empty()
         how_to_text_holder.empty()
         how_to_pic_holder.empty()
+        load_data(uploaded_file)
+        uploading_holder.empty()
+
         st.write("Chat Uploaded Successfully!")
         # st.header("Chat Uploaded Successfully!")
         sleep(2)
