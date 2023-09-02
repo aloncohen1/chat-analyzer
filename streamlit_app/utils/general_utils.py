@@ -1,12 +1,8 @@
 import pandas as pd
-from whatstk import WhatsAppChat
 import streamlit as st
-from whatstk.graph import FigureBuilder
 from streamlit_extras.switch_page_button import switch_page
-import json
-import plotly
 import pygeohash as pgh
-import numpy as np
+
 
 URL_PATTERN = r"(https:\/\/maps\.google\.com\/\?q=-?\d+\.\d+,-?\d+\.\d+)"
 
@@ -21,7 +17,7 @@ def add_logo():
         """
         <style>
             [data-testid="stSidebarNav"]::before {
-                content: "WhatsappAnalyzer";
+                content: "Chat Analyzer";
                 font-family: sans-serif;
                 margin-left: 20px;
                 margin-top: -300%;

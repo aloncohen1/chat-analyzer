@@ -7,7 +7,7 @@ import numpy as np
 
 from utils.general_utils import refer_to_load_data_section, set_background, add_logo, add_filters, \
     get_locations_markers, local_css
-from utils.graphs_utils import generate_piechart, generate_geo_chart
+from utils.graphs_utils import generate_piechart, generate_geo_barchart
 
 import json
 import requests
@@ -85,7 +85,7 @@ def main():
                 elif len(locations_df) > len(st.session_state['geo_data']):
                     st.session_state['geo_data'] = get_locations_details(locations_df)
 
-                st.plotly_chart(generate_geo_chart(st.session_state['geo_data'], "city"), use_container_width=True)
+                st.plotly_chart(generate_geo_barchart(st.session_state['geo_data'], "city"), use_container_width=True)
 
             st.write(st.session_state['geo_data'])
                 # st.metric("Overall Locations", locations_df.shape[0])

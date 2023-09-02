@@ -1,5 +1,4 @@
 import pandas as pd
-import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
 from whatstk import WhatsAppChat
@@ -10,7 +9,7 @@ DAYS_ORDER = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
 HOURS_ORDER = pd.date_range('1970-01-01', '1970-01-02', freq='H').strftime("%H:%M")
 
 
-def generate_geo_chart(df, geo_key='state_district'):
+def generate_geo_barchart(df, geo_key='state_district'):
 
     agg_df = df[geo_key].value_counts(normalize=True).reset_index()\
         .rename(columns={'index': 'Area'})

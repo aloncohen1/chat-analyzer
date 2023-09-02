@@ -4,4 +4,5 @@ streamlit
 streamlit-extras
 streamlit-folium
 folium
+plotly
 
