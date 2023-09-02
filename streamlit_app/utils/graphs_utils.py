@@ -9,7 +9,20 @@ DAYS_ORDER = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
 
 HOURS_ORDER = pd.date_range('1970-01-01', '1970-01-02', freq='H').strftime("%H:%M")
 
-def generate_piechart(df,top_n=10, metric="Messages"):
+
+def generate_geo_chart(df, geo_key='state_district'):
+
+    agg_df = df[geo_key].value_counts(normalize=True).reset_index()\
+        .rename(columns={'index': 'Area'})
+    agg_df[f'% of locations'] = agg_df[geo_key].apply(lambda x: "{0:.1f}%".format(x * 100))
+    fig = px.bar(agg_df, y="Area", x=geo_key, orientation='h')
+    fig.update_traces(marker_color="#24d366")
+    fig.layout.xaxis.tickformat = ',.1%'
+
+    return fig
+
+
+def generate_piechart(df, top_n=10, metric="Messages"):
 
     top_n = min(top_n, df["username"].nunique())
 
