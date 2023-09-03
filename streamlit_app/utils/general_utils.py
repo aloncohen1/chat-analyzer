@@ -79,7 +79,8 @@ def add_filters():
     return filtered_df[filtered_df['date'].between(time_filter[0], time_filter[1])], time_filter[0], time_filter[1]
 
 def get_locations_markers(df):
-    locations_df = df[df['message'].str.contains('maps.google')]
+    locations_df = df[(df['message'].str.contains('maps.google.com')) &
+                      (df['message'].str.contains('q='))]
     if not locations_df.empty:
         locations_df['lat'], locations_df['lon'] = zip(*locations_df['message'].str.extract(URL_PATTERN)[0]\
                                                        .apply(lambda x: x.split('=')[1].split(',')))
