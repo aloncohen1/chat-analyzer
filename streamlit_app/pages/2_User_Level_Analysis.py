@@ -21,6 +21,10 @@ def main():
             st.plotly_chart(generate_message_responses_flow(filtered_df), use_container_width=True)
             # You can create a similar template for each section as the main app
 
+        conversation = st.sidebar.multiselect("Conversation", list(filtered_df['conversation_id'].unique()))
+
+        st.write(filtered_df[filtered_df['conversation_id'].isin(conversation)])
+
 
 # Run the app
 if __name__ == "__main__":
