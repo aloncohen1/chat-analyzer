@@ -9,14 +9,34 @@ DAYS_ORDER = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
 HOURS_ORDER = pd.date_range('1970-01-01', '1970-01-02', freq='H').strftime("%H:%M")
 
 
-def generate_geo_barchart(df, geo_key='state_district'):
+def generate_geo_barchart(df, geo_key='city', top_n=10):
 
-    agg_df = df[geo_key].value_counts(normalize=True).reset_index()\
-        .rename(columns={'index': 'Area'})
-    agg_df[f'% of locations'] = agg_df[geo_key].apply(lambda x: "{0:.1f}%".format(x * 100))
-    fig = px.bar(agg_df, y="Area", x=geo_key, orientation='h')
+    agg_df = df[geo_key].value_counts(normalize=True).reset_index()[0:top_n] \
+        .rename(columns={'index': geo_key.capitalize(), geo_key: '% of Locations'}) \
+
+    agg_df = agg_df.append(pd.DataFrame(data=[[1 - agg_df['% of Locations'].sum(), 'Other']],
+                                        columns=[f'% of Locations', geo_key.capitalize()]))\
+        .sort_values('% of Locations')
+
+    fig = px.bar(agg_df, x=f'% of Locations', y=geo_key.capitalize(), orientation='h')
     fig.update_traces(marker_color="#24d366")
     fig.layout.xaxis.tickformat = ',.1%'
+
+    return fig
+
+def generate_geo_piehart(df, geo_key='state',top_n=10):
+
+    agg_df = df[geo_key].value_counts(normalize=True).reset_index()[0:top_n] \
+        .rename(columns={'index': 'Area'})
+
+    agg_df = agg_df.append(pd.DataFrame(data=[[1 - agg_df[geo_key].sum(), 'Other']], columns=[geo_key, "Area"]))
+    agg_df[f'% of {geo_key}'] = agg_df[geo_key].apply(lambda x: "{0:.1f}%".format(x * 100))
+    fig = px.pie(agg_df, values=geo_key, names='Area', hole=0.5, hover_data=[f'% of {geo_key}'])
+
+    fig.update_traces(marker=dict(line=dict(color='black', width=2)), title_text=f'{geo_key.capitalize()} Share by Locations')
+    fig.update_traces(showlegend=False, textposition='inside', textinfo='percent+label')
+    fig.update_traces(hovertemplate=geo_key.capitalize() + ": %{label}<br>% of Locations: %{percent}")
+    fig.update_layout(paper_bgcolor="rgba(18,32,43)", plot_bgcolor="rgba(18,32,43)")
 
     return fig
 
@@ -44,15 +64,17 @@ def generate_piechart(df, top_n=10, metric="Messages"):
     return fig
 
 
-def generate_activity_overtime(df, min_date, max_date, granularity='month'):
+def generate_activity_overtime(df, min_date, max_date, unit='Messages', granularity='month'):
 
     freq_dict = {'date': '1D', 'month': 'MS', 'week': 'W-MON'}
 
-    agg_df = df.groupby(granularity).agg({'username': 'count'}) \
-        .reindex(pd.date_range(min_date, max_date, freq=freq_dict[granularity]), fill_value=0).reset_index() \
-        .rename(columns={'username': '# of Messages', 'index': granularity.capitalize()})
+    unit_dict = {'Messages': 'count', 'Users': 'nunique'}
 
-    fig = px.line(agg_df, x=granularity.capitalize(), y='# of Messages')
+    agg_df = df.groupby(granularity).agg({'username': unit_dict[unit]}) \
+        .reindex(pd.date_range(min_date, max_date, freq=freq_dict[granularity]), fill_value=0).reset_index() \
+        .rename(columns={'username': f'# of {unit}', 'index': granularity.capitalize()})
+
+    fig = px.line(agg_df, x=granularity.capitalize(), y=f'# of {unit}')
     fig['data'][0]['line']['color'] = "#24d366"
     fig.update_layout(title_text='Chat Activity Over Time')
     fig.update_layout(paper_bgcolor="rgba(18,32,43)", plot_bgcolor="rgba(18,32,43)")

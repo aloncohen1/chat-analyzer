@@ -39,7 +39,7 @@ def main():
 
     home_holder = st.empty()
     home_holder.header("Upload Data")
-    home_holder.write("Supports Whatsapp (.txt) / Telegram (.html)")
+    home_holder.subheader("Supports Whatsapp (.txt) / Telegram (.html)")
 
     uploading_holder = st.empty()
     uploaded_file = uploading_holder.file_uploader("Choose a TXT / HTML file/s", type=["txt", "html"],

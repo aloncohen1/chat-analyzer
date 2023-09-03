@@ -29,10 +29,12 @@ def main():
 
         col4.plotly_chart(generate_piechart(filtered_df), use_container_width=True)
         with col5:
+            unit = st.selectbox(
+                "Messages / Users", ("Messages", "Users"))
             tab_0, tab_1, tab_2 = st.tabs(["Monthly", "Weekly", "Daily"])
-            tab_0.plotly_chart(generate_activity_overtime(filtered_df, min_date, max_date, "month"), use_container_width=True)
-            tab_1.plotly_chart(generate_activity_overtime(filtered_df, min_date, max_date, 'week'), use_container_width=True)
-            tab_2.plotly_chart(generate_activity_overtime(filtered_df, min_date, max_date, 'date'), use_container_width=True)
+            tab_0.plotly_chart(generate_activity_overtime(filtered_df, min_date, max_date, unit, "month"), use_container_width=True)
+            tab_1.plotly_chart(generate_activity_overtime(filtered_df, min_date, max_date, unit, 'week'), use_container_width=True)
+            tab_2.plotly_chart(generate_activity_overtime(filtered_df, min_date, max_date, unit, 'date'), use_container_width=True)
 
         col6, col7 = st.columns((6, 10))
 

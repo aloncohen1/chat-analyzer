@@ -1,16 +1,22 @@
 import pandas as pd
 import streamlit as st
-from streamlit_extras.switch_page_button import switch_page
+import json
+import requests
+
 from streamlit_folium import st_folium
 import folium
-import numpy as np
 
 from utils.general_utils import refer_to_load_data_section, set_background, add_logo, add_filters, \
     get_locations_markers, local_css
-from utils.graphs_utils import generate_piechart, generate_geo_barchart
+from utils.graphs_utils import generate_geo_barchart, generate_geo_piehart
 
-import json
-import requests
+
+def filter_locations_df(df, locations_df, min_date, max_date):
+
+    filtered_locations_df = df[(df['timestamp'].dt.date.between(min_date, max_date)) &
+                               df['username'].isin(locations_df['username'].unique())]
+
+    return filtered_locations_df
 
 
 
@@ -32,10 +38,12 @@ def get_locations_details(locations_df):
     for index, item in enumerate(locations_df[['lat', 'lon']].values):
         lat, lng = item
         locations_details_df = map_query(longitude=lng, latitude=lat)
-        address_list.append(locations_details_df.get('address') if locations_details_df else {})
+        if locations_details_df.get('address'):
+            address_list.append(locations_details_df.get('address'))
         location_resolver_bar.progress(((index + 1) / len(locations_df)), text=progress_text)
 
     location_resolver_bar.empty()
+
     return locations_df.drop(["popup", 'geohash'], axis=1).join(pd.DataFrame(address_list))
 
 
@@ -52,8 +60,6 @@ def main():
         filtered_df, min_date, max_date = add_filters()
 
         locations_df = get_locations_markers(filtered_df)
-
-        # locations_details_df = get_locations_details(filtered_df)
 
         if not locations_df.empty:
             st.markdown(local_css("streamlit_app/streamlit/styles/metrics.css"), unsafe_allow_html=True)
@@ -76,22 +82,28 @@ def main():
             col1.metric("Overall Locations", locations_df.shape[0])
             col2.metric("Overall Users", locations_df['username'].nunique())
             col2, col3 = st.columns((10, 6))
+
             with col2:
                 st_folium(m, width=2000, height=500, returned_objects=[], use_container_width=True)
+
             with col3:
-
-                if 'geo_data' not in st.session_state:
-                    st.session_state['geo_data'] = get_locations_details(locations_df)
-                elif len(locations_df) > len(st.session_state['geo_data']):
+                if ('geo_data' not in st.session_state) or (len(locations_df) > len(st.session_state['geo_data'])):
                     st.session_state['geo_data'] = get_locations_details(locations_df)
 
-                st.plotly_chart(generate_geo_barchart(st.session_state['geo_data'], "city"), use_container_width=True)
+                filtered_locations_df = filter_locations_df(st.session_state['geo_data'], locations_df, min_date, max_date)
+                st.plotly_chart(generate_geo_piehart(filtered_locations_df, "country"), use_container_width=True)
 
-            st.write(st.session_state['geo_data'])
-                # st.metric("Overall Locations", locations_df.shape[0])
+            filtered_locations_df = filter_locations_df(st.session_state['geo_data'], locations_df, min_date, max_date)
+
+            col4, col5 = st.columns((6, 8))
+            col4.plotly_chart(generate_geo_barchart(filtered_locations_df, "city"), use_container_width=True)
+            col5.plotly_chart(generate_geo_barchart(filtered_locations_df, "road"), use_container_width=True)
+
+            # st.write(st.session_state['geo_data'])
+
         else:
             st.header('No Locations to show')
-            # You can create a similar template for each section as the main app
+
 
 
 # Run the app
