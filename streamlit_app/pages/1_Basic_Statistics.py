@@ -20,6 +20,9 @@ def main():
 
         st.markdown(local_css("streamlit_app/streamlit/styles/metrics.css"), unsafe_allow_html=True)
 
+        if st.session_state.get('file_name'):
+            st.header(st.session_state.get('file_name'))
+
         col1, col2, col3 = st.columns([5, 4, 1.5], gap='large')
         col1.metric("Overall Users", f"{filtered_df['username'].nunique():,}",)
         col2.metric("Overall Messages", f"{filtered_df.shape[0]:,}")

@@ -5,4 +5,6 @@ streamlit-extras
 streamlit-folium
 folium
 plotly
-
+googletrans==3.1.0a0
+emoji
+sklearn

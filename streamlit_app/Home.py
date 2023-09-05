@@ -20,6 +20,9 @@ def load_data(files):
     for index, file in enumerate(files):
         if file.name.endswith('.txt'):
             df_list.append(_df_from_str(file.read().decode()))
+            st.session_state['file_name'] = file.name.replace('.txt', '')\
+                .replace('WhatsApp Chat with', '').replace('_','')
+
         elif file.name.endswith('.html'):
             df_list.append(parse_telegram_html(file.read().decode()))
 
