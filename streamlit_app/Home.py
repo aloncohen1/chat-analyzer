@@ -4,7 +4,7 @@ from streamlit_extras.switch_page_button import switch_page
 
 import streamlit as st
 from whatstk.whatsapp.parser import _df_from_str
-from utils.general_utils import add_timestamps_df, set_background, add_logo
+from utils.general_utils import add_metadata_to_df, set_background, add_logo
 from utils.telegram_utils import parse_telegram_html
 
 
@@ -27,7 +27,7 @@ def load_data(files):
             df_list.append(parse_telegram_html(file.read().decode()))
 
         progress_bar.progress(((index + 1) / len(files)), text="Uploading...")
-    final_df = add_timestamps_df(pd.concat(df_list)).sort_values('timestamp')
+    final_df = add_metadata_to_df(pd.concat(df_list)).sort_values('timestamp')
     st.session_state['data'] = final_df
 
     progress_bar.progress(100)

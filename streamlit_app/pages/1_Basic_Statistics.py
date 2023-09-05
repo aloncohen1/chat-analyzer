@@ -22,6 +22,7 @@ def main():
 
         if st.session_state.get('file_name'):
             st.header(st.session_state.get('file_name'))
+        st.subheader('Basic Statistics')
 
         col1, col2, col3 = st.columns([5, 4, 1.5], gap='large')
         col1.metric("Overall Users", f"{filtered_df['username'].nunique():,}",)

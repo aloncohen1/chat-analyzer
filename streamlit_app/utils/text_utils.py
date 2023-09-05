@@ -18,4 +18,6 @@ def get_emojis_bow(df):
     X = vectorizer.fit_transform(users_emoji_df['emojis'])
     bow_df = pd.DataFrame(X.toarray(), columns=vectorizer.get_feature_names_out(), index=users_emoji_df['username'])
     # bow_df.head()
-    pd.DataFrame(bow_df.drop([' '], axis=1).idxmax(axis=1)).reset_index().rename(columns={0: 'top_freq_emoji'})
+    # pd.DataFrame(bow_df.drop([' '], axis=1).idxmax(axis=1)).reset_index().rename(columns={0: 'top_freq_emoji'})
+
+    return bow_df

@@ -61,6 +61,10 @@ def main():
 
         locations_df = get_locations_markers(filtered_df)
 
+        if st.session_state.get('file_name'):
+            st.header(st.session_state.get('file_name'))
+        st.subheader('Geographics')
+
         if not locations_df.empty:
             st.markdown(local_css("streamlit_app/streamlit/styles/metrics.css"), unsafe_allow_html=True)
 

@@ -56,7 +56,7 @@ def add_conversation_id(df):
     df.loc[(df['time_diff_minutes'] >= df['time_diff_minutes'].quantile(0.8)), 'conversation_id'] -= 1
     return df
 
-def add_timestamps_df(df):
+def add_metadata_to_df(df):
 
     df['timestamp'] = pd.to_datetime(df['date'])
     df['year'] = df['timestamp'].dt.year
@@ -65,6 +65,8 @@ def add_timestamps_df(df):
     df['week'] = df['timestamp'].dt.to_period('W').dt.start_time
     df['month'] = df['timestamp'].to_numpy().astype('datetime64[M]')
     df['day_name'] = df['timestamp'].dt.day_name()
+    df['is_media'] = df['message'].str.contains('<Media omitted>')
+    df['text_length'] = df['message'].apply(lambda x: len(str(x).split(' ')))
 
     df = add_conversation_id(df)
 
