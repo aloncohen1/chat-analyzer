@@ -1,8 +1,8 @@
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from whatstk import WhatsAppChat
-from whatstk.graph import FigureBuilder
+# from whatstk import WhatsAppChat
+# from whatstk.graph import FigureBuilder
 
 DAYS_ORDER = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
@@ -143,10 +143,10 @@ def generate_activity_matrix(df):
 
     return fig
 
-def generate_message_responses_flow(df, n_users=7):
-    fig = FigureBuilder(chat=WhatsAppChat(
-        df[df['username'].isin(df['username'].value_counts()[0: n_users].index)])).user_message_responses_flow()
-    fig.update_layout(paper_bgcolor="rgba(18,32,43)", plot_bgcolor="rgba(18,32,43)")
-    # fig.update_layout(paper_bgcolor="rgba(255,255,255,0.5)", plot_bgcolor="rgba(255,255,255,0.5)",
-    #                   height=900, width=1200)
-    return fig
+# def generate_message_responses_flow(df, n_users=7):
+#     fig = FigureBuilder(chat=WhatsAppChat(
+#         df[df['username'].isin(df['username'].value_counts()[0: n_users].index)])).user_message_responses_flow()
+#     fig.update_layout(paper_bgcolor="rgba(18,32,43)", plot_bgcolor="rgba(18,32,43)")
+#     # fig.update_layout(paper_bgcolor="rgba(255,255,255,0.5)", plot_bgcolor="rgba(255,255,255,0.5)",
+#     #                   height=900, width=1200)
+#     return fig

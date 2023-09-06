@@ -3,7 +3,8 @@ import pandas as pd
 from streamlit_extras.switch_page_button import switch_page
 
 import streamlit as st
-from whatstk.whatsapp.parser import _df_from_str
+from utils.whatspp_utils import _df_from_str
+
 from utils.general_utils import add_metadata_to_df, set_background, add_logo
 from utils.telegram_utils import parse_telegram_html
 
