@@ -1,4 +1,3 @@
-whatstk
 pygeohash
 streamlit
 streamlit-extras
