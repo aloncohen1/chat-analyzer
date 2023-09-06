@@ -6,3 +6,4 @@ streamlit-folium
 folium
 googletrans==3.1.0a0
 emoji
+scikit-learn
