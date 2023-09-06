@@ -7,12 +7,11 @@ from whatstk.whatsapp.parser import _df_from_str
 from utils.general_utils import add_metadata_to_df, set_background, add_logo
 from utils.telegram_utils import parse_telegram_html
 
+st.set_page_config(
+    page_title="Hello",
+    page_icon="👋",
+)
 
-#
-# st.set_page_config(
-#     page_title="Hello",
-#     page_icon="👋",
-# )
 
 def load_data(files):
     progress_bar = st.progress(0, text="Uploading...")
@@ -24,10 +23,12 @@ def load_data(files):
                 .replace('WhatsApp Chat with', '').replace('_','')
 
         elif file.name.endswith('.html'):
-            df_list.append(parse_telegram_html(file.read().decode()))
+            group_name, group_df = parse_telegram_html(file.read().decode())
+            st.session_state['file_name'] = group_name
+            df_list.append(group_df)
 
         progress_bar.progress(((index + 1) / len(files)), text="Uploading...")
-    final_df = add_metadata_to_df(pd.concat(df_list)).sort_values('timestamp')
+    final_df = add_metadata_to_df(pd.concat(df_list, ignore_index=True)).sort_values('timestamp')
     st.session_state['data'] = final_df
 
     progress_bar.progress(100)

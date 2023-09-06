@@ -54,7 +54,7 @@ def add_conversation_id(df):
     df['time_diff_minutes'] = ((df['timestamp_prev'] - df['timestamp']).dt.seconds / 60)
     df['conversation_id'] = (df['time_diff_minutes'] >= df['time_diff_minutes'].quantile(0.8)).astype(int).cumsum()
     df.loc[(df['time_diff_minutes'] >= df['time_diff_minutes'].quantile(0.8)), 'conversation_id'] -= 1
-    return df
+    return df.drop('timestamp_prev', axis=1)
 
 def add_metadata_to_df(df):
 

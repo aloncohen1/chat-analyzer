@@ -3,8 +3,11 @@ import dateutil
 import pandas as pd
 
 def parse_telegram_html(data):
+
     data_list = []
+
     soup = BeautifulSoup(data, 'html.parser')
+    group_name = list(soup.find('div', class_='text bold'))[0].strip()
     for div in soup.select("div.message.default"):
         body = div.find('div', class_='body')
         from_name_ = body.find('div', class_='from_name')
@@ -21,7 +24,7 @@ def parse_telegram_html(data):
 
         data_list.append({"username": username, "date": timestamp, "message": text, "links": links})
 
-    return pd.DataFrame(data_list)
+    return group_name,pd.DataFrame(data_list)
 
 #
 #

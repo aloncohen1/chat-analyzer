@@ -46,6 +46,8 @@ def main():
 
         st.plotly_chart(generate_activity_matrix(filtered_df), use_container_width=True)
 
+        st.write(filtered_df[0:100])
+
 
 # Run the app
 if __name__ == "__main__":
