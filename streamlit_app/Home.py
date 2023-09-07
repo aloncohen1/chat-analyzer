@@ -1,5 +1,6 @@
 from time import sleep
 import pandas as pd
+import requests
 from streamlit_extras.switch_page_button import switch_page
 from whatstk.whatsapp.parser import _df_from_str
 
@@ -9,10 +10,21 @@ import streamlit as st
 from utils.general_utils import add_metadata_to_df, set_background, add_logo
 from utils.telegram_utils import parse_telegram_html
 
+TEST_DATA_URL = "https://raw.githubusercontent.com/tusharnankani/whatsapp-chat-data-analysis/main/whatsapp-chat-data.txt"
+
 st.set_page_config(
     page_title="Hello",
     page_icon="👋",
 )
+
+def load_test_data():
+    progress_bar = st.progress(0, text="Loading...")
+    data = requests.get(TEST_DATA_URL).text
+    df = _df_from_str(data)
+    df = add_metadata_to_df(df).sort_values('timestamp')
+    st.session_state['data'] = df
+    st.session_state['file_name'] = 'Chat for Example'
+    progress_bar.progress(100)
 
 
 def load_data(files):
@@ -51,6 +63,9 @@ def main():
     uploaded_file = uploading_holder.file_uploader("Choose a TXT / HTML file/s", type=["txt", "html"],
                                                    accept_multiple_files=True)
 
+    test_file_holder = st.empty()
+    load_test = test_file_holder.button("Load Chat Example File", type="primary")
+
     how_to_text_holder = st.empty()
     how_to_pic_holder = st.empty()
 
@@ -68,15 +83,26 @@ def main():
         col3.markdown('[![Foo](https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Telegram_2019_Logo.svg/242px-Telegram_2019_Logo.svg.png)](https://telegram.org/blog/export-and-more)')
 
     if uploaded_file:
+        uploading_holder.empty()
+        test_file_holder.empty()
         home_holder.empty()
         how_to_text_holder.empty()
         how_to_pic_holder.empty()
         load_data(uploaded_file)
-        uploading_holder.empty()
-
+        switch_page("basic statistics")
         st.write("Chat Uploaded Successfully!")
-        # st.header("Chat Uploaded Successfully!")
         sleep(2)
+
+    elif load_test:
+        test_file_holder.empty()
+        uploading_holder.empty()
+        home_holder.empty()
+        how_to_text_holder.empty()
+        how_to_pic_holder.empty()
+        load_test_data()
+        test_file_holder.empty()
+        sleep(2)
+        st.write("Chat Uploaded Successfully!")
         switch_page("basic statistics")
 
 
