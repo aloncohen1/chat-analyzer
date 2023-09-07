@@ -5,9 +5,7 @@ from utils.general_utils import refer_to_load_data_section, set_background, add_
 from PIL import Image
 import pandas as pd
 import emoji
-
 from utils.text_utils import get_emojis_bow
-
 
 def human_format(num, round_to=0):
     magnitude = 0
@@ -88,7 +86,7 @@ def assign_metrics(col,image,user_info):
 
 def main():
 
-    st.set_page_config(layout="wide")
+    st.set_page_config(layout="wide", page_title="User Level Analysis", page_icon="👫")
     set_background()
     add_logo()
 

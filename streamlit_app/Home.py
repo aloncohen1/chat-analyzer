@@ -12,10 +12,7 @@ from utils.telegram_utils import parse_telegram_html
 
 TEST_DATA_URL = "https://raw.githubusercontent.com/tusharnankani/whatsapp-chat-data-analysis/main/whatsapp-chat-data.txt"
 
-st.set_page_config(
-    page_title="Hello",
-    page_icon="👋",
-)
+
 
 def load_test_data():
     progress_bar = st.progress(0, text="Loading...")
@@ -50,6 +47,9 @@ def load_data(files):
 
 
 def main():
+
+    st.set_page_config(layout="wide", page_title="Hello", page_icon="👋")
+
     set_background()
 
     add_logo()

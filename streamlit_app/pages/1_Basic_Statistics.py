@@ -7,7 +7,7 @@ from utils.graphs_utils import generate_piechart, generate_activity_overtime, ge
 
 def main():
 
-    st.set_page_config(layout="wide")
+    st.set_page_config(layout="wide", page_title="Geographics", page_icon="📊")
     set_background()
     add_logo()
 

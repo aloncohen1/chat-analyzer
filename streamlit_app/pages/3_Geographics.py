@@ -49,7 +49,7 @@ def get_locations_details(locations_df):
 
 
 def main():
-    st.set_page_config(layout="wide")
+    st.set_page_config(layout="wide", page_title="Geographics", page_icon="🌎")
     add_logo()
     set_background()
 
