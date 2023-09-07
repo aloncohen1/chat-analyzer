@@ -7,7 +7,7 @@ from whatstk.whatsapp.parser import _df_from_str
 import streamlit as st
 # from utils.whatspp_utils import _df_from_str
 
-from utils.general_utils import add_metadata_to_df, set_background, add_logo
+from utils.general_utils import add_metadata_to_df, set_background, add_logo, generate_synthetic_locations
 from utils.telegram_utils import parse_telegram_html
 
 TEST_DATA_URL = "https://raw.githubusercontent.com/tusharnankani/whatsapp-chat-data-analysis/main/whatsapp-chat-data.txt"
@@ -18,7 +18,8 @@ def load_test_data():
     progress_bar = st.progress(0, text="Loading...")
     data = requests.get(TEST_DATA_URL).text
     df = _df_from_str(data)
-    df = add_metadata_to_df(df).sort_values('timestamp')
+    df = generate_synthetic_locations(df)
+    df = add_metadata_to_df(df).sort_values('timestamp').reset_index(drop=True)
     st.session_state['data'] = df
     st.session_state['file_name'] = 'Chat for Example'
     progress_bar.progress(100)

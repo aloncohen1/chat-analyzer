@@ -2,9 +2,38 @@ import pandas as pd
 import streamlit as st
 from streamlit_extras.switch_page_button import switch_page
 import pygeohash as pgh
-
+import numpy as np
+from datetime import timedelta
 
 URL_PATTERN = r"(https:\/\/maps\.google\.com\/\?q=-?\d+\.\d+,-?\d+\.\d+)"
+
+
+GEOHASH_FOR_EXAMPLE_CHAT = ["dr72", "sr2y", "xn77","stq4"]
+
+
+def generate_synthetic_locations(df):
+    results_list = []
+
+    dates_list = pd.date_range(df['date'].min(), df['date'].max()).to_pydatetime()
+    noise_list = np.linspace(0.999997, 1.00003)  # noise factor
+    user_list = df['username'].unique()
+
+    for geohash in GEOHASH_FOR_EXAMPLE_CHAT:
+        lat, lng = pgh.decode(geohash)
+        for i in range(2, np.random.choice(range(2, 10))):
+            location_text = 'location: https://maps.google.com/?q=%s,%s' % (lat * np.random.choice(noise_list),
+                                                                            lng * np.random.choice(noise_list))
+
+            rand_timestamp = np.random.choice(dates_list) + timedelta(hours=np.random.choice(range(-10, 10)) +
+                                                                            np.random.choice(range(-10, 10))/ 60)
+
+            rand_user = np.random.choice(user_list)
+
+            results_list.append({"date": rand_timestamp.isoformat(), "username": rand_user, "message": location_text})
+
+    synthetic_df = pd.DataFrame(results_list)
+
+    return pd.concat([df, synthetic_df], ignore_index=True)
 
 
 def local_css(file_name):
@@ -93,6 +122,7 @@ def add_filters():
 def get_locations_markers(df):
     locations_df = df[(df['message'].str.contains('maps.google.com')) &
                       (df['message'].str.contains('q='))]
+
     if not locations_df.empty:
         locations_df['lat'], locations_df['lon'] = zip(*locations_df['message'].str.extract(URL_PATTERN)[0]\
                                                        .apply(lambda x: x.split('=')[1].split(',')))
