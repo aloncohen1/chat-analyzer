@@ -3,7 +3,11 @@ pygeohash
 streamlit
 streamlit-extras
 streamlit-folium
+streamlit-analytics
 folium
 googletrans==3.1.0a0
 emoji
 scikit-learn
+polyglot
+PyICU
+pycld2

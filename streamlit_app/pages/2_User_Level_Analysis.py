@@ -1,7 +1,8 @@
 import streamlit as st
+import streamlit_analytics
 import numpy as np
 from utils.general_utils import refer_to_load_data_section, set_background, add_logo, add_filters, local_css
-# from utils.graphs_utils import generate_message_responses_flow
+from utils.graphs_utils import generate_message_responses_flow
 from PIL import Image
 import pandas as pd
 import emoji
@@ -69,7 +70,7 @@ def get_users_metrics(df, top_n):
         .sort_values('n_messages', ascending=False).reset_index(drop=True)[0:top_n]
 
 
-def assign_metrics(col,image,user_info):
+def assign_metrics(col, image, user_info, add_seperator=True):
     col.image(image, caption=user_info.username, width=100)
     col1, col2 = st.columns((2, 2))
     col1.metric('N Messages', human_format(user_info.n_messages))
@@ -82,6 +83,8 @@ def assign_metrics(col,image,user_info):
         col2.metric('Top Emoji', emoji.emojize(emoji.demojize(user_info.top_freq_emoji)))
     else:
         col2.metric('Top Emoji', 'No Emoji')
+    if add_seperator:
+        st.write('---------------')
 
 
 def main():
@@ -115,7 +118,7 @@ def main():
 
             for col, user_info in zip(row_a, metrics_df[int(row_b_n_users):].to_records()):
                 with col:
-                    assign_metrics(col, image, user_info)
+                    assign_metrics(col, image, user_info,add_seperator=False)
 
         add_metric_black_b()
 
@@ -130,4 +133,6 @@ def main():
 
 # Run the app
 if __name__ == "__main__":
+    streamlit_analytics.start_tracking()
     main()
+    streamlit_analytics.stop_tracking()

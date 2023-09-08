@@ -1,5 +1,6 @@
 
 import streamlit as st
+import streamlit_analytics
 from utils.general_utils import refer_to_load_data_section, set_background, add_logo, add_filters, local_css
 from utils.graphs_utils import generate_piechart, generate_activity_overtime, generate_weekly_activity, \
     generate_hourly_activity, generate_activity_matrix
@@ -7,7 +8,7 @@ from utils.graphs_utils import generate_piechart, generate_activity_overtime, ge
 
 def main():
 
-    st.set_page_config(layout="wide", page_title="Geographics", page_icon="📊")
+    st.set_page_config(layout="wide", page_title="Basic Statistics", page_icon="📊")
     set_background()
     add_logo()
 
@@ -51,4 +52,6 @@ def main():
 
 # Run the app
 if __name__ == "__main__":
+    streamlit_analytics.start_tracking()
     main()
+    streamlit_analytics.stop_tracking()

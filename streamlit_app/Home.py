@@ -1,6 +1,7 @@
 from time import sleep
 import pandas as pd
 import requests
+import streamlit_analytics
 from streamlit_extras.switch_page_button import switch_page
 from whatstk.whatsapp.parser import _df_from_str
 
@@ -107,6 +108,7 @@ def main():
         switch_page("basic statistics")
 
 
-
 if __name__ == "__main__":
+    streamlit_analytics.start_tracking()
     main()
+    streamlit_analytics.stop_tracking()

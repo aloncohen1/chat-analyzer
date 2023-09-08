@@ -2,6 +2,7 @@ import pandas as pd
 import streamlit as st
 import json
 import requests
+import streamlit_analytics
 
 from streamlit_folium import st_folium
 import folium
@@ -109,7 +110,7 @@ def main():
             st.header('No Locations to show')
 
 
-
-# Run the app
 if __name__ == "__main__":
+    streamlit_analytics.start_tracking()
     main()
+    streamlit_analytics.stop_tracking()
