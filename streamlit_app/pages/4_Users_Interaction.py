@@ -8,6 +8,7 @@ import streamlit_analytics
 from utils.general_utils import refer_to_load_data_section, set_background, add_logo, add_filters, \
     get_locations_markers, local_css
 from utils.graphs_utils import generate_message_responses_flow, user_message_responses_heatmap
+from utils.text_utils import get_lang_stop_words
 
 
 def filter_locations_df(df, locations_df, min_date, max_date):
@@ -69,6 +70,8 @@ def main():
 
         st.plotly_chart(generate_message_responses_flow(filtered_df,5), use_container_width=True)
         st.plotly_chart(user_message_responses_heatmap(filtered_df,10), use_container_width=True)
+
+        st.write(get_lang_stop_words(filtered_df))
 
 
 
