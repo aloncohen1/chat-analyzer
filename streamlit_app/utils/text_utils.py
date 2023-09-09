@@ -1,7 +1,6 @@
 import emoji
 import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
-from polyglot.detect import Detector
 import pandas as pd
 
 def get_users_emoji_df(df):
@@ -25,6 +24,6 @@ def get_emojis_bow(df):
     return bow_df
 
 
-def get_languages_df(df):
-    lan = Detector(df['message'].astype(str).sum()).languages
-    return pd.DataFrame(lan)
+# def get_languages_df(df):
+#     lan = Detector(df['message'].astype(str).sum()).languages
+#     return pd.DataFrame(lan)

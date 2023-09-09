@@ -8,6 +8,4 @@ folium
 googletrans==3.1.0a0
 emoji
 scikit-learn
-polyglot
-python3-icu
-pycld2
+nltk
