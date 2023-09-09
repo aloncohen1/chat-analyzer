@@ -9,5 +9,5 @@ googletrans==3.1.0a0
 emoji
 scikit-learn
 polyglot
-PyICU
+python3-icu
 pycld2
