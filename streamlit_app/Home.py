@@ -11,17 +11,20 @@ import streamlit as st
 from utils.general_utils import add_metadata_to_df, set_background, add_logo, generate_synthetic_locations
 from utils.telegram_utils import parse_telegram_html
 
-TEST_DATA_URL = "https://raw.githubusercontent.com/tusharnankani/whatsapp-chat-data-analysis/main/whatsapp-chat-data.txt"
-
+# TEST_DATA_URL = "https://raw.githubusercontent.com/tusharnankani/whatsapp-chat-data-analysis/main/whatsapp-chat-data.txt"
+CHAT_EXAMPLE_PATH = 'example_chat.txt'
 
 
 def load_test_data():
     progress_bar = st.progress(0, text="Loading...")
-    data = requests.get(TEST_DATA_URL).text
+    # data = requests.get(TEST_DATA_URL).text
+    with open(CHAT_EXAMPLE_PATH) as f:
+        data = f.read()
     df = _df_from_str(data)
     df = generate_synthetic_locations(df)
     df = add_metadata_to_df(df).sort_values('timestamp').reset_index(drop=True)
     st.session_state['data'] = df
+    st.session_state['lang'] = None
     st.session_state['file_name'] = 'Chat for Example'
     progress_bar.progress(100)
 
@@ -43,6 +46,7 @@ def load_data(files):
         progress_bar.progress(((index + 1) / len(files)), text="Uploading...")
     final_df = add_metadata_to_df(pd.concat(df_list, ignore_index=True)).sort_values('timestamp')
     st.session_state['data'] = final_df
+    st.session_state['lang'] = None
 
     progress_bar.progress(100)
 
