@@ -86,6 +86,8 @@ def get_users_top_worlds(df, n_users=10, top_words=5):
 
     if lang == "hebrew":
         stop_words +=[f'{i}ו' for i in stop_words]
+        stop_words += [f'{i}מ' for i in stop_words]
+        stop_words += [f'{i}ה' for i in stop_words]
 
     df['clean_text'] = df['message'].apply(lambda x: clean_text(x, lang))
 
