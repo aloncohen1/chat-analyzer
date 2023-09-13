@@ -26,11 +26,12 @@ def main():
 
         col0, col1 = st.columns((15, 10))
         with col0:
-            st.spinner('Wait for it...')
-            users_top_words_df = get_users_top_worlds(filtered_df, top_words=5)
-            users_top_words_df['show_text'] = [True] + [False] * (len(users_top_words_df) - 1)
-            edited_df = st.data_editor(users_top_words_df, num_rows="dynamic")
-            usernames = edited_df[edited_df["show_text"]].index.to_list()
+            with st.spinner('Wait for it...'):
+
+                users_top_words_df = get_users_top_worlds(filtered_df, top_words=5)
+                users_top_words_df['show_text'] = [True] + [False] * (len(users_top_words_df) - 1)
+                edited_df = st.data_editor(users_top_words_df, num_rows="dynamic")
+                usernames = edited_df[edited_df["show_text"]].index.to_list()
 
         with col1:
             for username in usernames:

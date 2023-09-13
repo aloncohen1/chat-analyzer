@@ -8,7 +8,7 @@ DAYS_ORDER = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
 
 HOURS_ORDER = pd.date_range('1970-01-01', '1970-01-02', freq='H').strftime("%H:%M")
 
-
+FREQ_DICT = {'date': '1D', 'month': 'MS', 'week': 'W-MON'}
 def generate_geo_barchart(df, geo_key='city', top_n=10):
 
     agg_df = df[geo_key].value_counts(normalize=True).reset_index()[0:top_n] \
@@ -66,22 +66,47 @@ def generate_piechart(df, top_n=10, metric="Messages"):
 
 def generate_activity_overtime(df, min_date, max_date, unit='Messages', granularity='month'):
 
-    freq_dict = {'date': '1D', 'month': 'MS', 'week': 'W-MON'}
-
     unit_dict = {'Messages': 'count', 'Users': 'nunique'}
 
     agg_df = df.groupby(granularity).agg({'username': unit_dict[unit]}) \
-        .reindex(pd.date_range(min_date, max_date, freq=freq_dict[granularity]), fill_value=0).reset_index() \
+        .reindex(pd.date_range(min_date, max_date, freq=FREQ_DICT[granularity]), fill_value=0).reset_index() \
         .rename(columns={'username': f'# of {unit}', 'index': granularity.capitalize()})
 
     fig = px.line(agg_df, x=granularity.capitalize(), y=f'# of {unit}')
     fig['data'][0]['line']['color'] = "#24d366"
-    fig.update_layout(title_text='Chat Activity Over Time')
+    fig.update_layout(title_text='Overall Chat Activity Over Time')
     fig.update_layout(paper_bgcolor="rgba(18,32,43)", plot_bgcolor="rgba(18,32,43)")
     fig.update_layout(hovermode="x")
     fig.update_traces(mode='markers+lines')
     return fig
 
+def generate_users_activity_overtime(df, min_date, max_date, granularity='month',top_n=5):
+
+    top_n = min(top_n, df["username"].nunique())
+
+    users_dfs = []
+
+    users = df["username"].value_counts(normalize=True)[0:top_n].index
+
+    for user in users:
+        user_df = df[df['username'] == user].groupby([granularity]) \
+            .agg(n_messages=('username', "count")) \
+            .reindex(pd.date_range(min_date, max_date, freq=FREQ_DICT[granularity]), fill_value=0).reset_index()
+        user_df['username'] = user
+        users_dfs.append(user_df)
+
+    agg_df = pd.concat(users_dfs, ignore_index=True)\
+        .rename(columns={'n_messages': f'# of Messages',
+                         'index': granularity.capitalize(),
+                         'username': 'Username'})
+
+    fig = px.line(agg_df, x=granularity.capitalize(), y=f'# of Messages', color='Username')
+
+    fig.update_layout(title_text=f'Users Activity Over Time (Top {top_n})')
+    fig.update_layout(paper_bgcolor="rgba(18,32,43)", plot_bgcolor="rgba(18,32,43)")
+    fig.update_layout(hovermode="x")
+    fig.update_traces(mode='markers+lines')
+    return fig
 
 def generate_hourly_activity(df):
     fig = px.bar(df['hour'].value_counts(normalize=True).sort_index().reset_index()\
@@ -128,7 +153,13 @@ def generate_activity_matrix(df):
     matrix_df = df.groupby(['day_name', 'hour'], as_index=False).agg(n_message=('username', 'count')) \
         .rename(columns={'day_name': 'Day',
                          'hour': 'Hour'})\
-        .pivot(index='Day', columns='Hour', values='n_message').fillna(0).reindex(DAYS_ORDER) / len(df)
+        .pivot(index='Day', columns='Hour', values='n_message') / len(df)
+
+    matrix_df = matrix_df.reindex(DAYS_ORDER)
+    for col in HOURS_ORDER:
+        if col not in matrix_df:
+            matrix_df[col] = 0
+    matrix_df = matrix_df[HOURS_ORDER].fillna(0)
 
     fig = go.Figure(data=go.Heatmap(
         z=matrix_df.values,
@@ -149,8 +180,7 @@ def generate_message_responses_flow(df, n_users=5):
         df[df['username'].isin(df['username'].value_counts()[0: n_users].index)]))\
         .user_message_responses_flow(f'Message flow (Top {n_users})')
     fig.update_layout(paper_bgcolor="rgba(18,32,43)", plot_bgcolor="rgba(18,32,43)")
-    # fig.update_layout(paper_bgcolor="rgba(255,255,255,0.5)", plot_bgcolor="rgba(255,255,255,0.5)",
-    #                   height=900, width=1200)
+
     return fig
 
 
@@ -159,7 +189,6 @@ def user_message_responses_heatmap(df,n_users=10):
         df[df['username'].isin(df['username'].value_counts()[0: n_users].index)]))\
         .user_message_responses_heatmap(title=f'Message flow (Top {n_users})')
     fig.update_layout(paper_bgcolor="rgba(18,32,43)", plot_bgcolor="rgba(18,32,43)", )
-    fig.update_traces(name="")
-    # fig.update_layout(paper_bgcolor="rgba(255,255,255,0.5)", plot_bgcolor="rgba(255,255,255,0.5)",
-    #                   height=900, width=1200)
+    fig.update_traces(name="", hovertemplate="Day: %{y}---> %{x}:  %{z:,}")
+
     return fig
