@@ -104,6 +104,8 @@ def add_metadata_to_df(df):
 def add_filters():
     min_date = st.session_state['data']['date'].min()
     max_date = st.session_state['data']['date'].max()
+    if min_date == max_date:
+        max_date = max_date + timedelta(days=1)
 
     st.sidebar.write('')
     time_filter = st.sidebar.slider("Time Period", min_date, max_date, (min_date, max_date))

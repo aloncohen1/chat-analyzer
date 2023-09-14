@@ -3,13 +3,12 @@ import pandas as pd
 import requests
 import streamlit_analytics
 from streamlit_extras.switch_page_button import switch_page
-from whatstk.whatsapp.parser import _df_from_str
 
 import streamlit as st
-# from utils.whatspp_utils import _df_from_str
+from utils.parsers import _df_from_str
 
 from utils.general_utils import add_metadata_to_df, set_background, add_logo, generate_synthetic_locations
-from utils.telegram_utils import parse_telegram_html
+from utils.parsers import parse_telegram_html
 
 # TEST_DATA_URL = "https://raw.githubusercontent.com/tusharnankani/whatsapp-chat-data-analysis/main/whatsapp-chat-data.txt"
 CHAT_EXAMPLE_PATH = 'example_chat.txt'
