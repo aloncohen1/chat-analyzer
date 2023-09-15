@@ -58,13 +58,15 @@ def main():
         refer_to_load_data_section()
 
     else:
-        filtered_df, min_date, max_date = add_filters()
+        filtered_df, min_date, max_date, language = add_filters()
 
         locations_df = get_locations_markers(filtered_df)
 
         if st.session_state.get('file_name'):
             st.header(st.session_state.get('file_name'))
-        st.subheader('Geographics')
+
+        header_text = {'en': 'Geographics', 'he': 'ניתוח גיאוגרפי'}
+        st.subheader(header_text[language])
 
         if not locations_df.empty:
             st.markdown(local_css("streamlit_app/streamlit/styles/metrics.css"), unsafe_allow_html=True)
@@ -84,8 +86,10 @@ def main():
                               tooltip=i['username']+'<br>'+i['timestamp'].date().isoformat()).add_to(m)
 
             col1, col2 = st.columns((10, 6))
-            col1.metric("Overall Locations", locations_df.shape[0])
-            col2.metric("Overall Users", locations_df['username'].nunique())
+            loc_lang_dict = {'en': "Overall Locations", "he": 'סה"כ מיקומים'}
+            users_lang_dict = {'en': "Overall Users", "he": 'סה"כ משתמשים'}
+            col1.metric(loc_lang_dict[language], locations_df.shape[0])
+            col2.metric(users_lang_dict[language], locations_df['username'].nunique())
             col2, col3 = st.columns((10, 6))
 
             with col2:
@@ -96,18 +100,17 @@ def main():
                     st.session_state['geo_data'] = get_locations_details(locations_df)
 
                 filtered_locations_df = filter_locations_df(st.session_state['geo_data'], locations_df, min_date, max_date)
-                st.plotly_chart(generate_geo_piehart(filtered_locations_df, "country"), use_container_width=True)
+                st.plotly_chart(generate_geo_piehart(filtered_locations_df, language), use_container_width=True)
 
             filtered_locations_df = filter_locations_df(st.session_state['geo_data'], locations_df, min_date, max_date)
 
             col4, col5 = st.columns((6, 8))
-            col4.plotly_chart(generate_geo_barchart(filtered_locations_df, "city"), use_container_width=True)
-            col5.plotly_chart(generate_geo_barchart(filtered_locations_df, "road"), use_container_width=True)
-
-            # st.write(st.session_state['geo_data'])
+            col4.plotly_chart(generate_geo_barchart(filtered_locations_df, language, "city"), use_container_width=True)
+            col5.plotly_chart(generate_geo_barchart(filtered_locations_df, language, "road"), use_container_width=True)
 
         else:
-            st.header('No Locations to show')
+            no_loc_lang_dict = {"en": 'No Locations to show', "he": "הדאטא אינו מכיל מיקומים לניתוח"}
+            st.header(no_loc_lang_dict[language])
 
 
 if __name__ == "__main__":

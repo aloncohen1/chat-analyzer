@@ -8,6 +8,8 @@ import pandas as pd
 import emoji
 from utils.text_utils import get_emojis_bow
 
+USER_IMAGE = Image.open("streamlit_app/streamlit/styles/logos/user_logo.jpg")
+
 def human_format(num, round_to=0):
     magnitude = 0
     while abs(num) >= 1000:
@@ -70,19 +72,27 @@ def get_users_metrics(df, top_n):
         .sort_values('n_messages', ascending=False).reset_index(drop=True)[0:top_n]
 
 
-def assign_metrics(col, image, user_info, add_seperator=True):
+def assign_metrics(col, image, user_info,language, add_seperator=True):
+
+    n_mes_lang_dict = {'en': "N Messages", 'he': 'סה"כ הודעות'}
+    n_wor_lang_dict = {'en': "N Words", 'he': 'סה"כ מילים'}
+    n_days_lang_dict = {'en': "N Active Days", 'he': 'סה"כ ימים פעילים'}
+    n_conv_lang_dict = {'en': "N Conversation", 'he': 'סה"כ שיחות'}
+    n_media_lang_dict = {'en': "N Media", 'he': 'תמונת/סרטונים'}
+    emoji_lang_dict = {'en': "Top Emoji", 'he': "אימוג'י שכיח"}
+
     col.image(image, caption=user_info.username, width=100)
     col1, col2 = st.columns((2, 2))
-    col1.metric('N Messages', human_format(user_info.n_messages))
-    col1.metric('N Words', human_format(user_info.n_words))
-    col2.metric('N Active Days', f"{user_info.n_days:,}")
-    col2.metric('N Conversation', human_format(user_info.n_conversation))
+    col1.metric(n_mes_lang_dict[language], human_format(user_info.n_messages))
+    col1.metric(n_wor_lang_dict[language], human_format(user_info.n_words))
+    col2.metric(n_days_lang_dict[language], f"{user_info.n_days:,}")
+    col2.metric(n_conv_lang_dict[language], human_format(user_info.n_conversation))
 
-    col1.metric('N Media', human_format(user_info.n_media))
+    col1.metric(n_media_lang_dict[language], human_format(user_info.n_media))
     if emoji.is_emoji(user_info.top_freq_emoji):
-        col2.metric('Top Emoji', emoji.emojize(emoji.demojize(user_info.top_freq_emoji)))
+        col2.metric(emoji_lang_dict[language], emoji.emojize(emoji.demojize(user_info.top_freq_emoji)))
     else:
-        col2.metric('Top Emoji', 'No Emoji')
+        col2.metric(emoji_lang_dict[language], 'No Emoji')
     if add_seperator:
         st.write('---------------')
 
@@ -97,9 +107,14 @@ def main():
         refer_to_load_data_section()
 
     else:
-        image = Image.open("streamlit_app/streamlit/styles/logos/user_logo.jpg")
 
-        filtered_df, min_date, max_date = add_filters()
+        filtered_df, min_date, max_date, language = add_filters()
+
+        if st.session_state.get('file_name'):
+            st.header(st.session_state.get('file_name'))
+
+        header_text = {'en': 'User Level Analysis', 'he': 'ניתוח משתמשים'}
+        st.subheader(header_text[language])
 
         top_n_users = min(filtered_df['username'].nunique(), 8)
 
@@ -112,13 +127,13 @@ def main():
         for col, user_info in zip(row_a, metrics_df[:int(row_a_n_users)].to_records()):
 
             with col:
-                assign_metrics(col, image, user_info)
+                assign_metrics(col, USER_IMAGE, user_info, language=language)
 
         if row_b_n_users != 0:
 
             for col, user_info in zip(row_a, metrics_df[int(row_b_n_users):].to_records()):
                 with col:
-                    assign_metrics(col, image, user_info,add_seperator=False)
+                    assign_metrics(col, USER_IMAGE, user_info, language=language,add_seperator=False)
 
         add_metric_black_b()
 

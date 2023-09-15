@@ -16,19 +16,18 @@ def main():
         refer_to_load_data_section()
 
     else:
-        filtered_df, min_date, max_date = add_filters()
+        filtered_df, min_date, max_date, language = add_filters()
 
         if st.session_state.get('file_name'):
             st.header(st.session_state.get('file_name'))
-        st.subheader('Users Interaction')
 
+        header_text = {'en': 'Users Interaction', 'he': 'אינטראקציית משתמשים'}
+        st.subheader(header_text[language])
 
         st.markdown(local_css("streamlit_app/streamlit/styles/metrics.css"), unsafe_allow_html=True)
 
-
-        st.plotly_chart(generate_message_responses_flow(filtered_df,5), use_container_width=True)
-        st.plotly_chart(user_message_responses_heatmap(filtered_df,10), use_container_width=True)
-
+        st.plotly_chart(generate_message_responses_flow(filtered_df, language, 5), use_container_width=True)
+        st.plotly_chart(user_message_responses_heatmap(filtered_df, language, 10), use_container_width=True)
 
 
         # st.write(get_users_top_worlds(st.session_state['data']), use_container_width=True)

@@ -8,8 +8,13 @@ from datetime import timedelta
 URL_PATTERN = r"(https:\/\/maps\.google\.com\/\?q=-?\d+\.\d+,-?\d+\.\d+)"
 
 
-GEOHASH_FOR_EXAMPLE_CHAT = ["dr72", "sr2y", "xn77","stq4"]
+GEOHASH_FOR_EXAMPLE_CHAT = ["dr72", "sr2y", "xn77", "stq4"]
 
+
+def app_language():
+    language = st.sidebar.selectbox('Language', ['English', 'עברית'])
+    language = 'en' if language == "English" else 'he'
+    return language
 
 def generate_synthetic_locations(df):
     results_list = []
@@ -59,8 +64,11 @@ def add_logo():
 
 
 def refer_to_load_data_section():
-    st.title("Please Upload Data to Analyze")
-    upload_data = st.button("Take me to uploading data page!")
+    language = app_language()
+    title = {'en': "Please Upload Data to Analyze", 'he': "אנא העלה נתונים לניתוח"}
+    st.title(title[language])
+    button_text = {'en': "Take me to uploading data page!", 'he': "!קח אותי לעמוד העלאת הנתונים"}
+    upload_data = st.button(button_text[language])
     if upload_data:
         switch_page("home")
 
@@ -119,7 +127,9 @@ def add_filters():
     else:
         filtered_df = st.session_state['data'][st.session_state['data']['username'].isin(users_filter)]
 
-    return filtered_df[filtered_df['date'].between(time_filter[0], time_filter[1])], time_filter[0], time_filter[1]
+    language = app_language()
+
+    return filtered_df[filtered_df['date'].between(time_filter[0], time_filter[1])], time_filter[0], time_filter[1], language
 
 def get_locations_markers(df):
     locations_df = df[(df['message'].str.contains('maps.google.com')) &

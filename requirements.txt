@@ -1,6 +1,7 @@
 pygeohash
 streamlit
 streamlit-extras
+streamlit-plotly-events
 streamlit-folium
 streamlit-analytics
 st-annotated-text

@@ -7,7 +7,7 @@ from streamlit_extras.switch_page_button import switch_page
 import streamlit as st
 from utils.parsers import _df_from_str
 
-from utils.general_utils import add_metadata_to_df, set_background, add_logo, generate_synthetic_locations
+from utils.general_utils import add_metadata_to_df, set_background, add_logo, generate_synthetic_locations, app_language
 from utils.parsers import parse_telegram_html
 
 # TEST_DATA_URL = "https://raw.githubusercontent.com/tusharnankani/whatsapp-chat-data-analysis/main/whatsapp-chat-data.txt"
@@ -58,27 +58,31 @@ def main():
     set_background()
 
     add_logo()
-    st.title("Chat Group Analyzer")
+    language = app_language()
+    title = {'en': "Chat Group Analyzer", 'he': "!מנתח הצ'אט"}
+    st.title(title[language])
 
     home_holder = st.empty()
-    home_holder.header("Upload Data")
-    home_holder.subheader("Supports Whatsapp (.txt) / Telegram (.html)")
+    home_holder_text = {"en": "Supports Whatsapp (.txt) / Telegram (.html)","he":"Whatsapp (.txt) / Telegram (.html) - תומך ב"}
+    home_holder.subheader(home_holder_text[language])
 
     uploading_holder = st.empty()
-    uploaded_file = uploading_holder.file_uploader("Choose a TXT / HTML file/s", type=["txt", "html"],
-                                                   accept_multiple_files=True)
+    upload_text = {"en": "Choose a TXT / HTML file/s", "he": "TXT / HTML בחר קובץ אחד או יותר מסוג"}
+    uploaded_file = uploading_holder.file_uploader(upload_text[language], type=["txt", "html"], accept_multiple_files=True)
 
     test_file_holder = st.empty()
-    load_test = test_file_holder.button("Load Chat Example File", type="primary")
+    example_text = {"en": "Load Chat Example File", "he": "טען צ'אט לדוגמא"}
+    load_test = test_file_holder.button(example_text[language], type="primary")
 
     how_to_text_holder = st.empty()
     how_to_pic_holder = st.empty()
 
     with how_to_text_holder:
         col0, col1 = st.columns((2, 1))
-
-        col0.subheader("How to export WhatsApp chat - [Click Here](https://faq.whatsapp.com/1180414079177245)")
-        col1.subheader("How to export Telegram chat - [Click Here](https://telegram.org/blog/export-and-more)")
+        whatsapp_text = {"en": "How to export WhatsApp chat - [Click Here]", "he": "איך לייצא את קובץ הצ'אט מווטסאפ - [לחץ כאן]"}
+        telegram_text = {"en": "How to export Telegram chat - [Click Here]", "he": "איך לייצא את קובץ הצ'אט מהטלגרם - [לחץ כאן]"}
+        col0.subheader(f"{whatsapp_text[language]}(https://faq.whatsapp.com/1180414079177245)")
+        col1.subheader(f"{telegram_text[language]}(https://telegram.org/blog/export-and-more)")
 
     with how_to_pic_holder:
 
