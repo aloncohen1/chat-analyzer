@@ -138,7 +138,7 @@ def main():
 
         add_metric_black_b()
 
-        st.write(get_users_metrics(filtered_df, top_n_users))
+        # st.write(get_users_metrics(filtered_df, top_n_users))
 
         # st.markdown(css_body_container, unsafe_allow_html=True)
 

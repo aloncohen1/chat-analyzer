@@ -7,7 +7,7 @@ import re
 from utils.general_utils import refer_to_load_data_section, set_background, add_logo, add_filters, local_css
 from streamlit_plotly_events import plotly_events
 from utils.graphs_utils import generate_message_responses_flow, user_message_responses_heatmap, \
-    generate_activity_overtime
+    generate_activity_overtime, generate_piechart, generate_users_activity_overtime
 from utils.text_utils import get_users_top_worlds
 from annotated_text import annotated_text, annotation
 
@@ -29,13 +29,19 @@ def main():
         st.subheader(header_text[language])
 
         st.markdown(local_css("streamlit_app/streamlit/styles/metrics.css"), unsafe_allow_html=True)
-        st.subheader('Explore your data!')
 
-
-        filtered_df = dataframe_explorer(filtered_df[['date', 'timestamp', 'username', 'message']], case=False)
-
-        st.dataframe(filtered_df, use_container_width=True)
-        st.plotly_chart(generate_activity_overtime(filtered_df, min_date, max_date, language, "Messages", 'date'))
+        col0, col1 = st.columns((5, 5))
+        with col0:
+            filtered_df = dataframe_explorer(filtered_df[['date', 'timestamp', 'username', 'message']], case=False)
+        with col1:
+            gran_lang_dict = {'en': ["Overall chat Activity", "Activity by user", "Activity Share"],
+                              'he': ["פעילות כללית על פני זמן", "פעילות לפי משתמש על פני זמן", "אחוז פעילות לפי משתמש"]}
+            tab_0, tab_1, tab_2 = st.tabs(gran_lang_dict[language])
+            tab_0.plotly_chart(generate_activity_overtime(filtered_df, min_date, max_date, language, "Messages", 'date'),unsafe_allow_html=True)
+            tab_1.plotly_chart(generate_users_activity_overtime(filtered_df, min_date, max_date, language, "date"), use_container_width=True)
+            tab_2.plotly_chart(generate_piechart(filtered_df, language), use_container_width=True)
+        if not filtered_df.empty:
+            st.dataframe(filtered_df, use_container_width=True)
 
         # selected_points = plotly_events(generate_activity_overtime(filtered_df, min_date, max_date,language, "Messages", 'date'))
         # st.write(selected_points)

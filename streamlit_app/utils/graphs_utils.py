@@ -58,32 +58,34 @@ def generate_geo_piehart(df, language='en',top_n=10,):
 
 
 def generate_piechart(df, language='en', top_n=10):
+    if not df.empty:
+        username_text = {'en': 'Username', 'he': "משתמש"}
+        other_text = {'en': 'Other', 'he': 'אחר'}
+        messages_text = {'en': '% of Messages', 'he': "הודעות %"}
+        plot_title = {'en': 'Messages Share by Username', 'he': "אחוז הודעות לפי משתמש"}
 
-    username_text = {'en': 'Username', 'he': "משתמש"}
-    other_text = {'en': 'Other', 'he': 'אחר'}
-    messages_text = {'en': '% of Messages', 'he': "הודעות %"}
-    plot_title = {'en': 'Messages Share by Username', 'he': "אחוז הודעות לפי משתמש"}
+        top_n = min(top_n, df["username"].nunique())
 
-    top_n = min(top_n, df["username"].nunique())
+        agg_df = df["username"].value_counts(normalize=True)[0:top_n].reset_index()
 
-    agg_df = df["username"].value_counts(normalize=True)[0:top_n].reset_index()
+        agg_df = agg_df.append(pd.DataFrame(data=[[1-agg_df["username"].sum(), other_text[language]]],
+                                            columns=["username", "index"]))\
+            .rename(columns={'index': username_text[language]})
 
-    agg_df = agg_df.append(pd.DataFrame(data=[[1-agg_df["username"].sum(), other_text[language]]],
-                                        columns=["username", "index"]))\
-        .rename(columns={'index': username_text[language]})
+        agg_df[messages_text[language]] = agg_df['username'].apply(lambda x: "{0:.1f}%".format(x * 100))
 
-    agg_df[messages_text[language]] = agg_df['username'].apply(lambda x: "{0:.1f}%".format(x * 100))
+        fig = px.pie(agg_df, values="username", names=username_text[language], hole=0.5, hover_data=[messages_text[language]])
+        # color_discrete_map={"Other": 'rgb(36, 211, 102)'}
 
-    fig = px.pie(agg_df, values="username", names=username_text[language], hole=0.5, hover_data=[messages_text[language]])
-    # color_discrete_map={"Other": 'rgb(36, 211, 102)'}
+        fig.update_traces(marker=dict(line=dict(color='black', width=2)), title_text=plot_title[language])
+        fig.update_traces(showlegend=False, textposition='inside', textinfo='percent+label')
+        fig.update_traces(hovertemplate="Username: %{label}<br>% of Messages : %{percent}")
+        fig.update_layout(paper_bgcolor="rgba(18,32,43)", plot_bgcolor="rgba(18,32,43)")
 
-    fig.update_traces(marker=dict(line=dict(color='black', width=2)), title_text=plot_title[language])
-    fig.update_traces(showlegend=False, textposition='inside', textinfo='percent+label')
-    fig.update_traces(hovertemplate="Username: %{label}<br>% of Messages : %{percent}")
-    fig.update_layout(paper_bgcolor="rgba(18,32,43)", plot_bgcolor="rgba(18,32,43)")
+        return fig
 
-    return fig
-
+    else:
+        return go.Figure()
 
 def generate_activity_overtime(df, min_date, max_date, language='en', unit='Messages', granularity='month'):
 
@@ -108,39 +110,41 @@ def generate_activity_overtime(df, min_date, max_date, language='en', unit='Mess
     return fig
 
 def generate_users_activity_overtime(df, min_date, max_date, language='en', granularity='month',top_n=5):
+    if not df.empty:
+        granularity_lan_dict = {"he": {'month': 'חודש', 'week': 'שבוע', 'date': 'יום'},
+                                'en': {'month': 'month', 'week': 'week', 'date': 'day'}}
+        messages_lang_dict = {'en': '# of Messages', 'he': "# הודעות"}
+        username_lang_dict = {'en': 'Username', 'he': "משתמש"}
+        plot_title = {'en': 'Users Activity Over Time (Top %s)', 'he': "(Top %s) טרנד פעילות כללית על פני זמן"}
 
-    granularity_lan_dict = {"he": {'month': 'חודש', 'week': 'שבוע', 'date': 'יום'},
-                            'en': {'month': 'month', 'week': 'week', 'date': 'day'}}
-    messages_lang_dict = {'en': '# of Messages', 'he': "# הודעות"}
-    username_lang_dict = {'en': 'Username', 'he': "משתמש"}
-    plot_title = {'en': 'Users Activity Over Time (Top %s)', 'he': "(Top %s) טרנד פעילות כללית על פני זמן"}
+        top_n = min(top_n, df["username"].nunique())
 
-    top_n = min(top_n, df["username"].nunique())
+        users_dfs = []
 
-    users_dfs = []
+        users = df["username"].value_counts(normalize=True)[0:top_n].index
 
-    users = df["username"].value_counts(normalize=True)[0:top_n].index
+        for user in users:
+            user_df = df[df['username'] == user].groupby([granularity]) \
+                .agg(n_messages=('username', "count")) \
+                .reindex(pd.date_range(min_date, max_date, freq=FREQ_DICT[granularity]), fill_value=0).reset_index()
+            user_df['username'] = user
+            users_dfs.append(user_df)
 
-    for user in users:
-        user_df = df[df['username'] == user].groupby([granularity]) \
-            .agg(n_messages=('username', "count")) \
-            .reindex(pd.date_range(min_date, max_date, freq=FREQ_DICT[granularity]), fill_value=0).reset_index()
-        user_df['username'] = user
-        users_dfs.append(user_df)
+        agg_df = pd.concat(users_dfs, ignore_index=True)\
+            .rename(columns={'n_messages': messages_lang_dict[language],
+                             'index': granularity_lan_dict[language][granularity].capitalize(),
+                             'username': username_lang_dict[language]})
 
-    agg_df = pd.concat(users_dfs, ignore_index=True)\
-        .rename(columns={'n_messages': messages_lang_dict[language],
-                         'index': granularity_lan_dict[language][granularity].capitalize(),
-                         'username': username_lang_dict[language]})
+        fig = px.line(agg_df, x=granularity_lan_dict[language][granularity].capitalize(), y=messages_lang_dict[language],
+                      color=username_lang_dict[language])
 
-    fig = px.line(agg_df, x=granularity_lan_dict[language][granularity].capitalize(), y=messages_lang_dict[language],
-                  color=username_lang_dict[language])
-
-    fig.update_layout(title_text=plot_title[language] % top_n)# f'Users Activity Over Time (Top {top_n})')
-    fig.update_layout(paper_bgcolor="rgba(18,32,43)", plot_bgcolor="rgba(18,32,43)")
-    fig.update_layout(hovermode="x")
-    fig.update_traces(mode='markers+lines')
-    return fig
+        fig.update_layout(title_text=plot_title[language] % top_n)# f'Users Activity Over Time (Top {top_n})')
+        fig.update_layout(paper_bgcolor="rgba(18,32,43)", plot_bgcolor="rgba(18,32,43)")
+        fig.update_layout(hovermode="x")
+        fig.update_traces(mode='markers+lines')
+        return fig
+    else:
+        return go.Figure()
 
 def generate_hourly_activity(df, language='en'):
 
