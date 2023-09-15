@@ -61,7 +61,7 @@ def generate_piechart(df, language='en', top_n=10):
 
     username_text = {'en': 'Username', 'he': "משתמש"}
     other_text = {'en': 'Other', 'he': 'אחר'}
-    messages_text = {'en': 'pct of Messages', 'he': "אחוז ההודעות"}
+    messages_text = {'en': '% of Messages', 'he': "הודעות %"}
     plot_title = {'en': 'Messages Share by Username', 'he': "אחוז הודעות לפי משתמש"}
 
     top_n = min(top_n, df["username"].nunique())
@@ -74,7 +74,7 @@ def generate_piechart(df, language='en', top_n=10):
 
     agg_df[messages_text[language]] = agg_df['username'].apply(lambda x: "{0:.1f}%".format(x * 100))
 
-    fig = px.pie(agg_df, values="username", names=username_text[language], hole=0.5, hover_data=messages_text[language])
+    fig = px.pie(agg_df, values="username", names=username_text[language], hole=0.5, hover_data=[messages_text[language]])
     # color_discrete_map={"Other": 'rgb(36, 211, 102)'}
 
     fig.update_traces(marker=dict(line=dict(color='black', width=2)), title_text=plot_title[language])
