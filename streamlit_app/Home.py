@@ -1,8 +1,8 @@
 from time import sleep
 import pandas as pd
-import requests
 import streamlit_analytics
 from streamlit_extras.switch_page_button import switch_page
+from streamlit_extras.buy_me_a_coffee import button
 
 import streamlit as st
 from utils.parsers import _df_from_str
@@ -118,4 +118,5 @@ def main():
 if __name__ == "__main__":
     streamlit_analytics.start_tracking()
     main()
+    button(username="bigalon1991", width=221)
     streamlit_analytics.stop_tracking()

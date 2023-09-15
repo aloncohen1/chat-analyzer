@@ -2,6 +2,7 @@ import streamlit as st
 import streamlit_analytics
 import numpy as np
 from utils.general_utils import refer_to_load_data_section, set_background, add_logo, add_filters, local_css
+from streamlit_extras.buy_me_a_coffee import button
 from utils.graphs_utils import generate_message_responses_flow
 from PIL import Image
 import pandas as pd
@@ -150,4 +151,5 @@ def main():
 if __name__ == "__main__":
     streamlit_analytics.start_tracking()
     main()
+    button(username="bigalon1991", width=221)
     streamlit_analytics.stop_tracking()

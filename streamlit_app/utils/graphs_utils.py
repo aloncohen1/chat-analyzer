@@ -61,7 +61,7 @@ def generate_piechart(df, language='en', top_n=10):
 
     username_text = {'en': 'Username', 'he': "משתמש"}
     other_text = {'en': 'Other', 'he': 'אחר'}
-    messages_text = {'en': '% of Messages', 'he': "הודעות %"}
+    messages_text = {'en': 'pct of Messages', 'he': "אחוז ההודעות"}
     plot_title = {'en': 'Messages Share by Username', 'he': "אחוז הודעות לפי משתמש"}
 
     top_n = min(top_n, df["username"].nunique())
@@ -94,7 +94,7 @@ def generate_activity_overtime(df, min_date, max_date, language='en', unit='Mess
                             'en': {'month': 'month', 'week': 'week', 'date': 'day'}}
 
     plot_title = {'en': 'Overall Chat Activity Over Time', 'he': "טרנד פעילות כללית על פני זמן"}
-    print(df)
+
     agg_df = df.groupby(granularity).agg({'username': unit_dict[unit]}) \
         .reindex(pd.date_range(min_date, max_date, freq=FREQ_DICT[granularity]), fill_value=0).reset_index() \
         .rename(columns={'username': f'# {unit_lan_dict[language][unit]}', 'index': granularity_lan_dict[language][granularity].capitalize()})

@@ -10,6 +10,7 @@ import folium
 from utils.general_utils import refer_to_load_data_section, set_background, add_logo, add_filters, \
     get_locations_markers, local_css
 from utils.graphs_utils import generate_geo_barchart, generate_geo_piehart
+from streamlit_extras.buy_me_a_coffee import button
 
 
 def filter_locations_df(df, locations_df, min_date, max_date):
@@ -116,4 +117,5 @@ def main():
 if __name__ == "__main__":
     streamlit_analytics.start_tracking()
     main()
+    button(username="bigalon1991", width=221)
     streamlit_analytics.stop_tracking()

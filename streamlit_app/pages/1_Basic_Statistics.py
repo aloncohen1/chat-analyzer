@@ -2,6 +2,7 @@
 import streamlit as st
 import streamlit_analytics
 from streamlit_plotly_events import plotly_events
+from streamlit_extras.buy_me_a_coffee import button
 
 from utils.general_utils import refer_to_load_data_section, set_background, add_logo, add_filters, local_css
 from utils.graphs_utils import generate_piechart, generate_activity_overtime, generate_day_of_week_activity, \
@@ -81,4 +82,5 @@ def main():
 if __name__ == "__main__":
     streamlit_analytics.start_tracking()
     main()
+    button(username="bigalon1991", width=221)
     streamlit_analytics.stop_tracking()

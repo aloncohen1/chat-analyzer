@@ -4,9 +4,11 @@ from streamlit_extras.switch_page_button import switch_page
 import pygeohash as pgh
 import numpy as np
 from datetime import timedelta
+from streamlit_extras.buy_me_a_coffee import button
+
+PAYPALINK = "https://www.paypal.com/donate/?hosted_button_id=DNQGP23BHG3UU"
 
 URL_PATTERN = r"(https:\/\/maps\.google\.com\/\?q=-?\d+\.\d+,-?\d+\.\d+)"
-
 
 GEOHASH_FOR_EXAMPLE_CHAT = ["dr72", "sr2y", "xn77", "stq4"]
 
@@ -110,6 +112,7 @@ def add_metadata_to_df(df):
     return df
 
 def add_filters():
+
     min_date = st.session_state['data']['date'].min()
     max_date = st.session_state['data']['date'].max()
     if min_date == max_date:

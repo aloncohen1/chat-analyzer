@@ -1,5 +1,7 @@
 import streamlit as st
 import streamlit_analytics
+from streamlit_extras.buy_me_a_coffee import button
+from streamlit_extras.dataframe_explorer import dataframe_explorer
 import re
 
 from utils.general_utils import refer_to_load_data_section, set_background, add_logo, add_filters, local_css
@@ -27,9 +29,16 @@ def main():
         st.subheader(header_text[language])
 
         st.markdown(local_css("streamlit_app/streamlit/styles/metrics.css"), unsafe_allow_html=True)
+        st.subheader('Explore your data!')
 
-        selected_points = plotly_events(generate_activity_overtime(filtered_df, min_date, max_date,language, "Messages", 'date'))
-        st.write(selected_points)
+
+        filtered_df = dataframe_explorer(filtered_df[['date', 'timestamp', 'username', 'message']], case=False)
+
+        st.dataframe(filtered_df, use_container_width=True)
+        st.plotly_chart(generate_activity_overtime(filtered_df, min_date, max_date, language, "Messages", 'date'))
+
+        # selected_points = plotly_events(generate_activity_overtime(filtered_df, min_date, max_date,language, "Messages", 'date'))
+        # st.write(selected_points)
 
 
         # col0, col1 = st.columns((15, 10))
@@ -77,4 +86,5 @@ def main():
 if __name__ == "__main__":
     streamlit_analytics.start_tracking()
     main()
+    button(username="bigalon1991", width=221)
     streamlit_analytics.stop_tracking()
