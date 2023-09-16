@@ -74,8 +74,10 @@ def main():
                 .rename({'preproc_text': 'Conversation'}).reset_index(drop=True)
             conv_df_to_sum['Conversations'] = 'Conversation ' + (conv_df_to_sum.index+1).astype(str)
 
-            conv = st.selectbox('Select a Date', conv_df_to_sum['Conversations'].to_list())
+            conv = st.selectbox('Select a Conversation', conv_df_to_sum['Conversations'].to_list())
             # st.metric(f'Overall Conversations', len(conv_df_to_sum))
+            st.write('')
+            st.write('')
             st.write('')
             sum_bool = st.button('Summarize Conversations')
         orig_text = conv_df_to_sum[conv_df_to_sum['Conversations'] == conv]['preproc_text'].iloc[0]
