@@ -93,10 +93,13 @@ def main():
                 with st.spinner('Summarizing...'):
                     st.subheader("Summarized Conversation")
                     st.write("------")
-                    preds = get_sum_text(conv_df_to_sum['preproc_text'].to_list())
-                    conv_df_to_sum['sum_text'] = preds
-                    sum_text = conv_df_to_sum[conv_df_to_sum['Conversations'] == conv]['sum_text'].iloc[0]
-                    st.write(sum_text)
+                    try:
+                        preds = get_sum_text(conv_df_to_sum['preproc_text'].to_list())
+                        conv_df_to_sum['sum_text'] = preds
+                        sum_text = conv_df_to_sum[conv_df_to_sum['Conversations'] == conv]['sum_text'].iloc[0]
+                        st.write(sum_text)
+                    except Exception as e:
+                        st.write("Somthing went wrong, please try again in a few seconds")
 
 
         #
