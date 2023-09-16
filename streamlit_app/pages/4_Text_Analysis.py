@@ -64,32 +64,42 @@ def main():
         if not filtered_df.empty:
             st.dataframe(rename_df_cols(filtered_df, language), use_container_width=True)
 
-        st.subheader('Conversations Summarizer (Beta)')
+        summrizer_title_lang_dict = {'en': 'Conversations Summarizer (Beta)', 'he': '(Beta) מסכם שיחות'}
+        st.subheader(summrizer_title_lang_dict[language])
 
         col1, col2, col3 = st.columns((2, 5, 5))
 
         conv_agg_df = get_conv_df(conv_df)
 
         with col1:
-            date = st.selectbox('Select a Date', conv_agg_df['date'].unique())
+            date_selector_lng_dict = {'en': 'Select a Date', 'he': 'בחר תאריך'}
+            conf_filed_lan_dict = {'en': 'Conversation', 'he': "שיחה"}
+            date = st.selectbox(date_selector_lng_dict[language], conv_agg_df['date'].unique())
             conv_df_to_sum = conv_agg_df[conv_agg_df['date'] == date][['preproc_text']] \
                 .rename({'preproc_text': 'Conversation'}).reset_index(drop=True)
-            conv_df_to_sum['Conversations'] = 'Conversation ' + (conv_df_to_sum.index+1).astype(str)
+            conv_df_to_sum['Conversations'] = f'{conf_filed_lan_dict[language]} ' + (conv_df_to_sum.index+1).astype(str)
 
-            conv = st.selectbox('Select a Conversation', conv_df_to_sum['Conversations'].to_list())
+
+            conv_selector_lang_dict = {'en': 'Select a Conversation', 'he': "בחר שיחה"}
+            conv = st.selectbox(conv_selector_lang_dict[language], conv_df_to_sum['Conversations'].to_list())
             # st.metric(f'Overall Conversations', len(conv_df_to_sum))
             st.write('')
             st.write('')
             st.write('')
-            sum_bool = st.button('Summarize Conversations')
+            button_lang_dict = {'en': 'Summarize Conversations', 'he': "סכם שיחות"}
+            sum_bool = st.button(button_lang_dict[language])
         orig_text = conv_df_to_sum[conv_df_to_sum['Conversations'] == conv]['preproc_text'].iloc[0]
-        col2.subheader("Original Conversation")
+        orig_text_lang_dict = {'en':"Original Conversation", 'he': "שיחה מקורית"}
+        col2.subheader(orig_text_lang_dict[language])
         col2.write("------")
-        for row in orig_text.split('\n'):
+        for index, row in enumerate (orig_text.split('\n')):
             col2.write(row)
+            # direct = 'left' if index % 2 == 0 else 'right'
+            # col2.markdown(f'<div style="text-align: {direct};">{row}</div>', unsafe_allow_html=True)
 
         with col3:
-            st.subheader("Summarized Conversation")
+            sum_text_lang_dict = {'en': "Summarized Conversation", 'he': "שיחה מסוכמת"}
+            st.subheader(sum_text_lang_dict[language])
             st.write("------")
             if sum_bool:
                 with st.spinner('Summarizing...'):
@@ -100,6 +110,9 @@ def main():
                         st.write(sum_text)
                     except Exception as e:
                         st.write("Somthing went wrong, please try again in a few seconds")
+                        st.write(e)
+
+
 
 
         #

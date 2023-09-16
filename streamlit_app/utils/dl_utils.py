@@ -23,6 +23,7 @@ def preprc_text_for_sum(row):
 
     return row.username + ': ' + row.message
 
+@st.cache_data(show_spinner=False)
 def get_conv_df(df, min_users=2, min_messages=4, min_length=8):
 
     df['preproc_text'] = df.apply(lambda x: preprc_text_for_sum(x), axis=1)
@@ -62,7 +63,7 @@ def run_trans(text_list, dest='en'):
 
     return results_list
 
-@st.cache_data
+@st.cache_data(show_spinner=False)
 def get_sum_text(text_list):
 
     trans_text = run_trans(text_list)
