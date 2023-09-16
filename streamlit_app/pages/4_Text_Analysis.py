@@ -110,7 +110,7 @@ def main():
                         st.write(sum_text)
                     except Exception as e:
                         st.write("Somthing went wrong, please try again in a few seconds")
-                        st.write(e)
+                        # st.write(e)
 
 
 

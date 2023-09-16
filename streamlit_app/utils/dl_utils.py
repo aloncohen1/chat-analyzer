@@ -1,12 +1,15 @@
 import json
 import re
 import requests
+from time import sleep
 import pandas as pd
 from googletrans import Translator
 import streamlit as st
 
 API_TOKEN ='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'
 API_URL = "https://api-inference.huggingface.co/models/philschmid/bart-large-cnn-samsum"
+# API_URL = "https://api-inference.huggingface.co/models/facebook/bart-large-cnn"
+
 headers = {"Authorization": f"Bearer {API_TOKEN}"}
 
 def wake_up_model():
@@ -64,11 +67,17 @@ def run_trans(text_list, dest='en'):
     return results_list
 
 @st.cache_data(show_spinner=False)
-def get_sum_text(text_list):
+def get_sum_text(text_list, retries=5, sleep_sec=7):
 
     trans_text = run_trans(text_list)
 
     sum_texts = query_hg({'inputs': [i['translation'] for i in trans_text], 'wait_for_model': True})
+    print(sum_texts)
+    retries_counter = 0
+    while retries < retries_counter and sum_texts.get('error').endswith('currently loading'):
+        sleep(sleep_sec)
+        sum_texts = query_hg({'inputs': [i['translation'] for i in trans_text], 'wait_for_model': True})
+        retries_counter += 1
 
     top_src = pd.DataFrame(trans_text)['src'].value_counts().index[0]
     if top_src != 'en':
