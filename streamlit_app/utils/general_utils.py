@@ -3,6 +3,7 @@ import streamlit as st
 from streamlit_extras.switch_page_button import switch_page
 import pygeohash as pgh
 import numpy as np
+import re
 from datetime import timedelta
 from streamlit_extras.buy_me_a_coffee import button
 
@@ -95,6 +96,11 @@ def add_conversation_id(df):
     df.loc[(df['time_diff_minutes'] >= df['time_diff_minutes'].quantile(0.8)), 'conversation_id'] -= 1
     return df.drop('timestamp_prev', axis=1)
 
+
+def is_phone_numbers(username):
+  pattern = r'^(?=.*[0-9])(?=.*-)(?=.*\+)[0-9\-+]+$'
+  return bool(re.match(pattern, username.replace(' ','')))
+
 def add_metadata_to_df(df):
 
     df['timestamp'] = pd.to_datetime(df['date'])
@@ -106,6 +112,7 @@ def add_metadata_to_df(df):
     df['day_name'] = df['timestamp'].dt.day_name()
     df['is_media'] = df['message'].str.contains('<Media omitted>')
     df['text_length'] = df['message'].apply(lambda x: len(str(x).split(' ')))
+    df['is_phone_number'] = df['username'].apply(lambda x: is_phone_numbers(x))
 
     df = add_conversation_id(df)
 

@@ -140,7 +140,7 @@ def generate_users_activity_overtime(df, min_date, max_date, language='en', gran
 
         fig.update_layout(title_text=plot_title[language] % top_n)# f'Users Activity Over Time (Top {top_n})')
         fig.update_layout(paper_bgcolor="rgba(18,32,43)", plot_bgcolor="rgba(18,32,43)")
-        fig.update_layout(hovermode="x")
+        fig.update_layout(hovermode="x") # legend=dict(orientation="h",yanchor="bottom",y=1.02,xanchor="right",x=1)
         fig.update_traces(mode='markers+lines')
         return fig
     else:

@@ -1,25 +1,46 @@
 import json
+import re
 import requests
 import pandas as pd
 from googletrans import Translator
+import streamlit as st
 
-API_TOKEN='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'
+API_TOKEN ='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'
 API_URL = "https://api-inference.huggingface.co/models/philschmid/bart-large-cnn-samsum"
 headers = {"Authorization": f"Bearer {API_TOKEN}"}
 
+def wake_up_model(run=False):
+    if run:
+      data = json.dumps({'inputs': 'wake up model',
+                        'wait_for_model': True})
+      requests.request("POST", API_URL, headers=headers, data=data)
 
-def preprocess_text(df, in_nusers=1, min_n_messages=3):
-    df['text'] = df['username'] + ': ' + df['message'].astype(str).str.replace('<Media omitted>', '<sent a photo>')
-    text_df = df.groupby('conversation_id', as_index=False) \
-        .agg({"text": '\n'.join,
+
+def preprc_text_for_sum(row):
+    row.message = str(row.message)
+    row.message = re.sub(r"http\S+", "<link>", row.message).lower()
+    row.message = row.message.replace('<media omitted>', '<here is a photo>')
+
+    return row.username + ': ' + row.message
+
+def get_conv_df(df, min_users=2, min_messages=4, min_length=8):
+
+    df['preproc_text'] = df.apply(lambda x: preprc_text_for_sum(x), axis=1)
+
+    conv_df = df.groupby('conversation_id') \
+        .agg({"preproc_text": '\n'.join,
               'username': 'nunique',
-              'conversation_id': 'count'}) \
+              'timestamp': 'count',
+              'is_media': 'sum',
+              'text_length': 'sum',
+              'date': 'min'}) \
         .rename(columns={'username': 'n_users',
-                         'conversation_id': 'n_messages'})
-
-    text_df = text_df[(text_df['n_users'] > in_nusers) &
-                      (text_df['n_messages'] > min_n_messages)]
-    return text_df
+                         'timestamp': 'n_messages'})
+    conv_df = conv_df[(conv_df['n_users'] >= min_users) &
+                      (conv_df['n_messages'] >= min_messages) &
+                      (conv_df['text_length'] >= min_length) &
+                      (conv_df['n_messages'] > conv_df['is_media'])].reset_index()
+    return conv_df
 
 
 def query_hg(payload):
@@ -41,8 +62,8 @@ def run_trans(text_list, dest='en'):
 
     return results_list
 
-
-def sum_text(text_list):
+@st.cache_data
+def get_sum_text(text_list):
 
     trans_text = run_trans(text_list)
 
@@ -57,3 +78,5 @@ def sum_text(text_list):
         final_text = [i.get('summary_text') for i in sum_texts]
 
     return final_text
+
+

@@ -4,12 +4,28 @@ from streamlit_extras.buy_me_a_coffee import button
 from streamlit_extras.dataframe_explorer import dataframe_explorer
 import re
 
+from utils.dl_utils import get_conv_df, get_sum_text
 from utils.general_utils import refer_to_load_data_section, set_background, add_logo, add_filters, local_css
 from streamlit_plotly_events import plotly_events
 from utils.graphs_utils import generate_message_responses_flow, user_message_responses_heatmap, \
     generate_activity_overtime, generate_piechart, generate_users_activity_overtime
 from utils.text_utils import get_users_top_worlds
 from annotated_text import annotated_text, annotation
+
+
+def rename_df_cols(df, language, inverse=False):
+    # {col: col.capitalize() for col in df.columns}
+    cols_lang_dict = {'en': {'date':'Date','timestamp':'Timestamp','username':'Username','message':'Message'},
+                      'he': {'date':'תאריך','timestamp':'שעה','username':'משתמש','message': 'הודעה'}}
+    if inverse:
+        for lan in cols_lang_dict.keys():
+            cols_lang_dict[lan] = {v: k for k, v in cols_lang_dict[lan].items()}
+    df = df[cols_lang_dict[language].keys()]
+    return df.rename(columns=cols_lang_dict[language])
+
+
+
+
 
 def main():
     st.set_page_config(layout="wide", page_title="Text Analysis", page_icon="🔀")
@@ -30,18 +46,56 @@ def main():
 
         st.markdown(local_css("streamlit_app/streamlit/styles/metrics.css"), unsafe_allow_html=True)
 
-        col0, col1 = st.columns((5, 5))
+        conv_df = filtered_df.copy()
+
+        col0, col1 = st.columns((2, 5))
         with col0:
-            filtered_df = dataframe_explorer(filtered_df[['date', 'timestamp', 'username', 'message']], case=False)
+            filtered_df = dataframe_explorer(rename_df_cols(filtered_df, language), case=False)
+            filtered_df = rename_df_cols(filtered_df, language, inverse=True)
         with col1:
             gran_lang_dict = {'en': ["Overall chat Activity", "Activity by user", "Activity Share"],
-                              'he': ["פעילות כללית על פני זמן", "פעילות לפי משתמש על פני זמן", "אחוז פעילות לפי משתמש"]}
+                              'he': ["פעילות כללית על פני זמן", "פעילות משתמשים על פני זמן", "אחוז פעילות לפי משתמש"]}
             tab_0, tab_1, tab_2 = st.tabs(gran_lang_dict[language])
-            tab_0.plotly_chart(generate_activity_overtime(filtered_df, min_date, max_date, language, "Messages", 'date'),unsafe_allow_html=True)
+            tab_0.plotly_chart(generate_activity_overtime(filtered_df, min_date, max_date, language, "Messages", 'date'),use_container_width=True)
             tab_1.plotly_chart(generate_users_activity_overtime(filtered_df, min_date, max_date, language, "date"), use_container_width=True)
             tab_2.plotly_chart(generate_piechart(filtered_df, language), use_container_width=True)
         if not filtered_df.empty:
-            st.dataframe(filtered_df, use_container_width=True)
+            st.dataframe(rename_df_cols(filtered_df, language), use_container_width=True)
+
+        st.subheader('Conversations Summarizer (Beta)')
+
+        col1, col2, col3 = st.columns((2, 5, 5))
+
+        conv_agg_df = get_conv_df(conv_df)
+
+        with col1:
+            date = st.selectbox('Select a Date', conv_agg_df['date'].unique())
+            conv_df_to_sum = conv_agg_df[conv_agg_df['date'] == date][['preproc_text']] \
+                .rename({'preproc_text': 'Conversation'}).reset_index(drop=True)
+            conv_df_to_sum['Conversations'] = 'Conversation ' + (conv_df_to_sum.index+1).astype(str)
+
+            conv = st.selectbox('Select a Date', conv_df_to_sum['Conversations'].to_list())
+            # st.metric(f'Overall Conversations', len(conv_df_to_sum))
+            st.write('')
+            sum_bool = st.button('Summarize Conversations')
+        orig_text = conv_df_to_sum[conv_df_to_sum['Conversations'] == conv]['preproc_text'].iloc[0]
+        col2.subheader("Original Conversation")
+        col2.write("------")
+        for row in orig_text.split('\n'):
+            col2.write(row)
+
+        with col3:
+            if sum_bool:
+                with st.spinner('Summarizing...'):
+                    st.subheader("Summarized Conversation")
+                    st.write("------")
+                    preds = get_sum_text(conv_df_to_sum['preproc_text'].to_list())
+                    conv_df_to_sum['sum_text'] = preds
+                    sum_text = conv_df_to_sum[conv_df_to_sum['Conversations'] == conv]['sum_text'].iloc[0]
+                    st.write(sum_text)
+
+
+        #
 
         # selected_points = plotly_events(generate_activity_overtime(filtered_df, min_date, max_date,language, "Messages", 'date'))
         # st.write(selected_points)
