@@ -9,11 +9,11 @@ API_TOKEN ='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'
 API_URL = "https://api-inference.huggingface.co/models/philschmid/bart-large-cnn-samsum"
 headers = {"Authorization": f"Bearer {API_TOKEN}"}
 
-def wake_up_model(run=False):
-    if run:
-      data = json.dumps({'inputs': 'wake up model',
-                        'wait_for_model': True})
-      requests.request("POST", API_URL, headers=headers, data=data)
+def wake_up_model():
+
+  data = json.dumps({'inputs': 'wake up model',
+                    'wait_for_model': True})
+  requests.request("POST", API_URL, headers=headers, data=data)
 
 
 def preprc_text_for_sum(row):

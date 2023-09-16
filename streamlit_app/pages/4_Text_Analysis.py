@@ -4,7 +4,7 @@ from streamlit_extras.buy_me_a_coffee import button
 from streamlit_extras.dataframe_explorer import dataframe_explorer
 import re
 
-from utils.dl_utils import get_conv_df, get_sum_text
+from utils.dl_utils import get_conv_df, get_sum_text, wake_up_model
 from utils.general_utils import refer_to_load_data_section, set_background, add_logo, add_filters, local_css
 from streamlit_plotly_events import plotly_events
 from utils.graphs_utils import generate_message_responses_flow, user_message_responses_heatmap, \
@@ -28,6 +28,8 @@ def rename_df_cols(df, language, inverse=False):
 
 
 def main():
+
+    wake_up_model()
     st.set_page_config(layout="wide", page_title="Text Analysis", page_icon="🔀")
     add_logo()
     set_background()
