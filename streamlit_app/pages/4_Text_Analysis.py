@@ -89,10 +89,10 @@ def main():
             col2.write(row)
 
         with col3:
+            st.subheader("Summarized Conversation")
+            st.write("------")
             if sum_bool:
                 with st.spinner('Summarizing...'):
-                    st.subheader("Summarized Conversation")
-                    st.write("------")
                     try:
                         preds = get_sum_text(conv_df_to_sum['preproc_text'].to_list())
                         conv_df_to_sum['sum_text'] = preds
