@@ -74,10 +74,11 @@ def get_sum_text(text_list, retries=5, sleep_sec=7):
     sum_texts = query_hg({'inputs': [i['translation'] for i in trans_text], 'wait_for_model': True})
     print(sum_texts)
     retries_counter = 0
-    while retries < retries_counter and sum_texts.get('error').endswith('currently loading'):
-        sleep(sleep_sec)
-        sum_texts = query_hg({'inputs': [i['translation'] for i in trans_text], 'wait_for_model': True})
-        retries_counter += 1
+    while retries_counter < retries and isinstance(sum_texts,dict):
+        if sum_texts.get('error').endswith('currently loading'):
+            sleep(sleep_sec)
+            sum_texts = query_hg({'inputs': [i['translation'] for i in trans_text], 'wait_for_model': True})
+            retries_counter += 1
 
     top_src = pd.DataFrame(trans_text)['src'].value_counts().index[0]
     if top_src != 'en':
