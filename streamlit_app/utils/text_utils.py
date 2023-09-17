@@ -4,7 +4,7 @@ import scipy.sparse as sp
 from scipy.sparse import csr_matrix
 import streamlit
 from googletrans import Translator
-from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer, TfidfVectorizer
 
 import pandas as pd
 import nltk
@@ -21,29 +21,27 @@ from sklearn.preprocessing import normalize
 
 
 def get_users_emoji_df(df):
-    df['emojis'] = df['message'].apply(lambda x: ''.join([i['emoji'] for i in emoji.emoji_list(str(x))]))
-    df['distinct_emojis'] = df['message'].apply(lambda x: ''.join(emoji.distinct_emoji_list(str(x))))
-
-    users_emoji_df = df[df['distinct_emojis'] != ''].groupby('username', as_index=False).agg({'emojis': 'sum'})
-    return users_emoji_df
+    df['emojis_list'] = df['message'].apply(lambda x: [i['emoji'] for i in emoji.emoji_list(str(x))])
+    emoji_df = df[df['emojis_list'].apply(len) > 0].groupby('username',as_index=False).agg({'emojis_list': 'sum'})
+    emoji_df = emoji_df
+    return emoji_df
 
 
 def get_emojis_bow(df):
 
-    users_emoji_df = get_users_emoji_df(df)
+    emoji_df = get_users_emoji_df(df)
 
-    vectorizer = CountVectorizer(token_pattern=r'[^\s]+', analyzer='char_wb')
-    X = vectorizer.fit_transform(users_emoji_df['emojis'])
-    bow_df = pd.DataFrame(X.toarray(), columns=vectorizer.get_feature_names_out(), index=users_emoji_df['username'])
-    # bow_df.head()
-    # pd.DataFrame(bow_df.drop([' '], axis=1).idxmax(axis=1)).reset_index().rename(columns={0: 'top_freq_emoji'})
+    def dummy(doc):
+        return doc
+
+    # vectorizer = TfidfVectorizer(tokenizer=dummy, preprocessor=dummy)
+    vectorizer = CountVectorizer(tokenizer=dummy,preprocessor=dummy)
+    X = vectorizer.fit_transform(emoji_df['emojis_list'])
+    bow_df = pd.DataFrame(X.toarray(), columns=vectorizer.get_feature_names_out(), index=emoji_df['username'])
 
     return bow_df
 
 
-# def get_languages_df(df):
-#     lan = Detector(df['message'].astype(str).sum()).languages
-#     return pd.DataFrame(lan)
 
 def detect_lang(df, n_sample=30, min_text_length=10):
 

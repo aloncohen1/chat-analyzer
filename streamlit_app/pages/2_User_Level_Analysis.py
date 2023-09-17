@@ -66,7 +66,7 @@ def get_users_metrics(df, top_n):
                                 n_media=('is_media', 'sum'))
 
     emoji_bow = get_emojis_bow(df)
-    top_freq_emoji = pd.DataFrame(emoji_bow.drop([' '], axis=1).idxmax(axis=1)).reset_index()\
+    top_freq_emoji = pd.DataFrame(emoji_bow.idxmax(axis=1)).reset_index()\
         .rename(columns={0: 'top_freq_emoji'})
 
     return agg_df.merge(top_freq_emoji, on='username', how='left')\

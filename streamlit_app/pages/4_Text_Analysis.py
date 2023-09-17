@@ -121,7 +121,7 @@ def main():
         col2.write("------")
         for conv_id, orig_text_i in zip(conv_ids, orig_text):
             # col2.write(f'Conversation {conv_index}')
-            col2.markdown(f'<div style="text-align: right;">{conv_id}</div>', unsafe_allow_html=True)
+            col2.markdown(f'<div style="text-align: right;"><b><u>{conv_id}</b></u></div>', unsafe_allow_html=True)
             for index, row in enumerate(orig_text_i.split('\n')):
                 col2.write(row)
             col2.write("------")
@@ -145,7 +145,7 @@ def main():
                             sum_text = conv_df_to_sum["sum_text"].to_list()
 
                         for conv_id, sum_text_i in zip(conv_ids, sum_text):
-                            st.markdown(f'<div style="text-align: right;">{conv_id}</div>', unsafe_allow_html=True)
+                            st.markdown(f'<div style="text-align: right;"><b><u>{conv_id}</b></u></div>', unsafe_allow_html=True)
                             st.write(sum_text_i)
                             st.write("------")
                     except Exception as e:
