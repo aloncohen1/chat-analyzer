@@ -15,8 +15,10 @@ from annotated_text import annotated_text, annotation
 
 def rename_df_cols(df, language, inverse=False):
     # {col: col.capitalize() for col in df.columns}
-    cols_lang_dict = {'en': {'date':'Date','timestamp':'Timestamp','username':'Username','message':'Message'},
-                      'he': {'date':'תאריך','timestamp':'שעה','username':'משתמש','message': 'הודעה'}}
+    cols_lang_dict = {'en': {'date':'Date','week':'Week','month':'Month','timestamp':'Timestamp',
+                             'username':'Username','message':'Message'},
+                      'he': {'date':'תאריך','week':'שבוע','month':'חודש','timestamp':'שעה',
+                             'username':'משתמש','message': 'הודעה'}}
     if inverse:
         for lan in cols_lang_dict.keys():
             cols_lang_dict[lan] = {v: k for k, v in cols_lang_dict[lan].items()}
@@ -55,11 +57,25 @@ def main():
             filtered_df = dataframe_explorer(rename_df_cols(filtered_df, language), case=False)
             filtered_df = rename_df_cols(filtered_df, language, inverse=True)
         with col1:
-            gran_lang_dict = {'en': ["Overall chat Activity", "Activity by user", "Activity Share"],
+            section_lang_dict = {'en': ["Overall chat Activity", "Activity by user", "Activity Share"],
                               'he': ["פעילות כללית על פני זמן", "פעילות משתמשים על פני זמן", "אחוז פעילות לפי משתמש"]}
-            tab_0, tab_1, tab_2 = st.tabs(gran_lang_dict[language])
-            tab_0.plotly_chart(generate_activity_overtime(filtered_df, min_date, max_date, language, "Messages", 'date'),use_container_width=True)
-            tab_1.plotly_chart(generate_users_activity_overtime(filtered_df, min_date, max_date, language, "date"), use_container_width=True)
+
+            tab_0, tab_1, tab_2 = st.tabs(section_lang_dict[language])
+            with tab_0:
+                gran_lang_dict = {'en': ["Monthly", "Weekly", "Daily"], 'he': ["חודשי", "שבועי", "יומי"]}
+                sub0_0, sub0_1, sub0_2 = st.tabs(gran_lang_dict[language])
+                sub0_0.plotly_chart(generate_activity_overtime(filtered_df, min_date, max_date, language, "Messages", 'month'),use_container_width=True)
+                sub0_1.plotly_chart(generate_activity_overtime(filtered_df, min_date, max_date, language, "Messages", 'week'),use_container_width=True)
+                sub0_2.plotly_chart(generate_activity_overtime(filtered_df, min_date, max_date, language, "Messages", 'date'),use_container_width=True)
+            with tab_1:
+                sub1_0, sub1_1, sub1_2 = st.tabs(gran_lang_dict[language])
+                sub1_0.plotly_chart(generate_users_activity_overtime(filtered_df, min_date, max_date, language, "month"),
+                                    use_container_width=True)
+                sub1_1.plotly_chart(generate_users_activity_overtime(filtered_df, min_date, max_date, language, "week"),
+                                    use_container_width=True)
+                sub1_2.plotly_chart(generate_users_activity_overtime(filtered_df, min_date, max_date, language, "date"),
+                                    use_container_width=True)
+
             tab_2.plotly_chart(generate_piechart(filtered_df, language), use_container_width=True)
         if not filtered_df.empty:
             st.dataframe(rename_df_cols(filtered_df, language), use_container_width=True)
@@ -73,27 +89,42 @@ def main():
 
         with col1:
             date_selector_lng_dict = {'en': 'Select a Date', 'he': 'בחר תאריך'}
+            month_selector_lng_dict = {'en': 'Select a Month', 'he': 'בחר חודש'}
             conf_filed_lan_dict = {'en': 'Conversation', 'he': "שיחה"}
-            date = st.selectbox(date_selector_lng_dict[language], conv_agg_df['date'].unique())
+
+            month = st.selectbox(month_selector_lng_dict[language], conv_agg_df['month'].unique())
+
+            date = st.selectbox(date_selector_lng_dict[language],
+                                conv_agg_df[conv_agg_df['month'] == month]['date'].unique())
             conv_df_to_sum = conv_agg_df[conv_agg_df['date'] == date][['preproc_text']] \
                 .rename({'preproc_text': 'Conversation'}).reset_index(drop=True)
             conv_df_to_sum['Conversations'] = f'{conf_filed_lan_dict[language]} ' + (conv_df_to_sum.index+1).astype(str)
 
-
             conv_selector_lang_dict = {'en': 'Select a Conversation', 'he': "בחר שיחה"}
-            conv = st.selectbox(conv_selector_lang_dict[language], conv_df_to_sum['Conversations'].to_list())
+            all_lang_dict = {'en': 'All', 'he': "כל השיחות"}
+            conv = st.selectbox(conv_selector_lang_dict[language],[all_lang_dict[language]] + conv_df_to_sum['Conversations'].to_list())
             # st.metric(f'Overall Conversations', len(conv_df_to_sum))
             st.write('')
             st.write('')
             st.write('')
             button_lang_dict = {'en': 'Summarize Conversations', 'he': "סכם שיחות"}
             sum_bool = st.button(button_lang_dict[language])
-        orig_text = conv_df_to_sum[conv_df_to_sum['Conversations'] == conv]['preproc_text'].iloc[0]
-        orig_text_lang_dict = {'en':"Original Conversation", 'he': "שיחה מקורית"}
+        if conv not in all_lang_dict.values():
+            orig_text = conv_df_to_sum[conv_df_to_sum['Conversations'] == conv]['preproc_text'].iloc[0]
+            orig_text = [orig_text]
+            conv_ids = [conv]
+        else:
+            orig_text = conv_df_to_sum["preproc_text"].to_list()
+            conv_ids = conv_df_to_sum["Conversations"].to_list()
+        orig_text_lang_dict = {'en': "Original Conversation", 'he': "שיחה מקורית"}
         col2.subheader(orig_text_lang_dict[language])
         col2.write("------")
-        for index, row in enumerate (orig_text.split('\n')):
-            col2.write(row)
+        for conv_id, orig_text_i in zip(conv_ids, orig_text):
+            # col2.write(f'Conversation {conv_index}')
+            col2.markdown(f'<div style="text-align: right;">{conv_id}</div>', unsafe_allow_html=True)
+            for index, row in enumerate(orig_text_i.split('\n')):
+                col2.write(row)
+            col2.write("------")
             # direct = 'left' if index % 2 == 0 else 'right'
             # col2.markdown(f'<div style="text-align: {direct};">{row}</div>', unsafe_allow_html=True)
 
@@ -106,8 +137,17 @@ def main():
                     try:
                         preds = get_sum_text(conv_df_to_sum['preproc_text'].to_list())
                         conv_df_to_sum['sum_text'] = preds
-                        sum_text = conv_df_to_sum[conv_df_to_sum['Conversations'] == conv]['sum_text'].iloc[0]
-                        st.write(sum_text)
+
+                        if conv not in all_lang_dict.values():
+                            sum_text = conv_df_to_sum[conv_df_to_sum['Conversations'] == conv]['sum_text'].iloc[0]
+                            sum_text = [sum_text]
+                        else:
+                            sum_text = conv_df_to_sum["sum_text"].to_list()
+
+                        for conv_id, sum_text_i in zip(conv_ids, sum_text):
+                            st.markdown(f'<div style="text-align: right;">{conv_id}</div>', unsafe_allow_html=True)
+                            st.write(sum_text_i)
+                            st.write("------")
                     except Exception as e:
                         st.write("Somthing went wrong, please try again in a few seconds")
                         st.write(e)
