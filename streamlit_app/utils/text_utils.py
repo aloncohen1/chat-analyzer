@@ -23,7 +23,6 @@ from sklearn.preprocessing import normalize
 def get_users_emoji_df(df):
     df['emojis_list'] = df['message'].apply(lambda x: [i['emoji'] for i in emoji.emoji_list(str(x))])
     emoji_df = df[df['emojis_list'].apply(len) > 0].groupby('username',as_index=False).agg({'emojis_list': 'sum'})
-    emoji_df = emoji_df
     return emoji_df
 
 
