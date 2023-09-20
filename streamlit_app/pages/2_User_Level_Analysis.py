@@ -7,16 +7,19 @@ from utils.graphs_utils import generate_message_responses_flow
 from PIL import Image
 import pandas as pd
 import emoji
-from utils.text_utils import get_emojis_bow
+from utils.text_utils import get_top_emojis
 
 USER_IMAGE = Image.open("streamlit_app/streamlit/styles/logos/user_logo.jpg")
 
-def human_format(num, round_to=0):
-    magnitude = 0
-    while abs(num) >= 1000:
-        magnitude += 1
-        num = round(num / 1000.0, round_to)
-    return '{:.{}f}{}'.format(num, round_to, ['', 'K', 'M', 'G', 'T', 'P'][magnitude])
+def human_format(num, pct=True):
+    if pct:
+        return "{0:.0f}%".format(num * 100)
+    else:
+        magnitude = 0
+        while abs(num) >= 1000:
+            magnitude += 1
+            num = round(num / 1000.0, 0)
+        return '{:.{}f}{}'.format(num, 0, ['', 'K', 'M', 'G', 'T', 'P'][magnitude])
 
 
 def add_metric_black_b():
@@ -57,7 +60,7 @@ def calc_n_user_per_row(top_n_users):
     return output
 
 
-def get_users_metrics(df, top_n):
+def get_users_metrics(df, top_n,emoji_method, min_date, max_date):
 
     agg_df = df.groupby('username', as_index=False).agg(n_days=('date', 'nunique'),
                                 n_messages=('username', 'count'),
@@ -65,31 +68,40 @@ def get_users_metrics(df, top_n):
                                 n_words=('text_length', 'sum'),
                                 n_media=('is_media', 'sum'))
 
-    emoji_bow = get_emojis_bow(df)
-    top_freq_emoji = pd.DataFrame(emoji_bow.idxmax(axis=1)).reset_index()\
-        .rename(columns={0: 'top_freq_emoji'})
+    totals_df = df.agg(n_days=('date', 'nunique'),
+                                n_messages=('username', 'count'),
+                                n_conversation=('conversation_id', 'nunique'),
+                                n_words=('text_length', 'sum'),
+                                n_media=('is_media', 'sum')).max(axis=1)
 
-    return agg_df.merge(top_freq_emoji, on='username', how='left')\
+    top_emoji = get_top_emojis(st.session_state['data'][st.session_state['data']['date'].between(min_date, max_date)],
+                               emoji_method)
+
+    agg_df = agg_df.merge(top_emoji, on='username', how='left') \
         .sort_values('n_messages', ascending=False).reset_index(drop=True)[0:top_n]
 
+    return agg_df, totals_df
 
-def assign_metrics(col, image, user_info,language, add_seperator=True):
 
-    n_mes_lang_dict = {'en': "N Messages", 'he': 'סה"כ הודעות'}
-    n_wor_lang_dict = {'en': "N Words", 'he': 'סה"כ מילים'}
-    n_days_lang_dict = {'en': "N Active Days", 'he': 'סה"כ ימים פעילים'}
-    n_conv_lang_dict = {'en': "N Conversation", 'he': 'סה"כ שיחות'}
-    n_media_lang_dict = {'en': "N Media", 'he': 'תמונת/סרטונים'}
-    emoji_lang_dict = {'en': "Top Emoji", 'he': "אימוג'י שכיח"}
+def assign_metrics(col, totals_df, image, user_info, language, add_seperator=True, pct=True):
+
+    sign = {'en': '%' if pct else 'N', 'he': '%' if pct else 'סה"כ'}
+
+    n_mes_lang_dict = {'en': f"{sign[language]} Messages", 'he': f'{sign[language]} הודעות'}
+    n_wor_lang_dict = {'en': f"{sign[language]} Words", 'he': f'{sign[language]} מילים'}
+    n_days_lang_dict = {'en': f"{sign[language]} Active Days", 'he': f'{sign[language]} ימים פעילים'}
+    n_conv_lang_dict = {'en': f"{sign[language]} Conversation", 'he': f'{sign[language]} שיחות'}
+    n_media_lang_dict = {'en': f"{sign[language]} Media", 'he': f'תמונת/סרטונים'}
+    emoji_lang_dict = {'en': "Top Emoji", 'he': "אימוג'י"}
 
     col.image(image, caption=user_info.username, width=100)
     col1, col2 = st.columns((2, 2))
-    col1.metric(n_mes_lang_dict[language], human_format(user_info.n_messages))
-    col1.metric(n_wor_lang_dict[language], human_format(user_info.n_words))
-    col2.metric(n_days_lang_dict[language], f"{user_info.n_days:,}")
-    col2.metric(n_conv_lang_dict[language], human_format(user_info.n_conversation))
+    col1.metric(n_mes_lang_dict[language], human_format(user_info.n_messages / (totals_df.n_messages if pct else 1), pct))
+    col1.metric(n_wor_lang_dict[language], human_format(user_info.n_words/ (totals_df.n_words if pct else 1), pct))
+    col2.metric(n_days_lang_dict[language], human_format(user_info.n_days / (totals_df.n_days if pct else 1), pct))
+    col2.metric(n_conv_lang_dict[language], human_format(user_info.n_conversation/ (totals_df.n_conversation if pct else 1), pct))
 
-    col1.metric(n_media_lang_dict[language], human_format(user_info.n_media))
+    col1.metric(n_media_lang_dict[language], human_format(user_info.n_media/ (totals_df.n_media if pct else 1), pct))
     if emoji.is_emoji(user_info.top_freq_emoji):
         col2.metric(emoji_lang_dict[language], emoji.emojize(emoji.demojize(user_info.top_freq_emoji)))
     else:
@@ -113,13 +125,27 @@ def main():
 
         if st.session_state.get('file_name'):
             st.header(st.session_state.get('file_name'))
+        top_col, _ = st.columns((1000,0.1))
+        with top_col:
 
-        header_text = {'en': 'User Level Analysis', 'he': 'ניתוח משתמשים'}
-        st.subheader(header_text[language])
+            header_text = {'en': 'User Level Analysis', 'he': 'ניתוח משתמשים'}
+            st.subheader(header_text[language])
+            pct_lang_dict = {'en': "Show Percentages", "he":'הצג אחוזים'}
+
+            method_lang_dict = {'en': {"Most Associated":"Most Associated",
+                                        "Most Frequent":"Most Frequent"},
+                                 "he": {"המזוהה ביותר": "Most Associated",
+                                        "התדיר ביותר": "Most Frequent"}}
+
+            pct = st.checkbox(pct_lang_dict[language])
+            emohi_picker_lang_dict = {'en': "Top Emoji Method", 'he':"איזה אימוג'י"}
+            emoji_method = st.radio(emohi_picker_lang_dict[language], list(method_lang_dict[language].keys()))
+
+            emoji_method = method_lang_dict[language][emoji_method]
 
         top_n_users = min(filtered_df['username'].nunique(), 8)
 
-        metrics_df = get_users_metrics(filtered_df, top_n_users)
+        metrics_df, totals_df = get_users_metrics(filtered_df, top_n_users, emoji_method, min_date, max_date)
 
         row_a_n_users, row_b_n_users = calc_n_user_per_row(top_n_users)
 
@@ -128,23 +154,15 @@ def main():
         for col, user_info in zip(row_a, metrics_df[:int(row_a_n_users)].to_records()):
 
             with col:
-                assign_metrics(col, USER_IMAGE, user_info, language=language)
+                assign_metrics(col, totals_df, USER_IMAGE, user_info, language=language,pct=pct)
 
         if row_b_n_users != 0:
 
             for col, user_info in zip(row_a, metrics_df[int(row_b_n_users):].to_records()):
                 with col:
-                    assign_metrics(col, USER_IMAGE, user_info, language=language,add_seperator=False)
+                    assign_metrics(col,totals_df, USER_IMAGE, user_info, language=language,add_seperator=False,pct=pct)
 
         add_metric_black_b()
-
-        # st.write(get_users_metrics(filtered_df, top_n_users))
-
-        # st.markdown(css_body_container, unsafe_allow_html=True)
-
-        # conversation = st.sidebar.multiselect("Conversation", list(filtered_df['conversation_id'].unique()))
-        #
-        # st.write(filtered_df[filtered_df['conversation_id'].isin(conversation)])
 
 
 # Run the app

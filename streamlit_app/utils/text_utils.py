@@ -20,26 +20,43 @@ import re
 from sklearn.preprocessing import normalize
 
 
-def get_users_emoji_df(df):
-    df['emojis_list'] = df['message'].apply(lambda x: [i['emoji'] for i in emoji.emoji_list(str(x))])
+def get_users_emoji_df(df, method='top_freq'):
+    if method=='top_freq':
+        df['emojis_list'] = df['message'].apply(lambda x: [i['emoji'] for i in emoji.emoji_list(str(x))])
+    else:
+        df['emojis_list'] = df['message'].apply(lambda x: [i for i in emoji.distinct_emoji_list(str(x))])
+
     emoji_df = df[df['emojis_list'].apply(len) > 0].groupby('username',as_index=False).agg({'emojis_list': 'sum'})
     return emoji_df
 
 
-def get_emojis_bow(df):
+def get_top_emojis(df, method='Most Frequent'):
 
-    emoji_df = get_users_emoji_df(df)
+    emoji_df = get_users_emoji_df(df, method)
 
     def dummy(doc):
         return doc
 
-    # vectorizer = TfidfVectorizer(tokenizer=dummy, preprocessor=dummy)
     vectorizer = CountVectorizer(tokenizer=dummy,preprocessor=dummy)
     X = vectorizer.fit_transform(emoji_df['emojis_list'])
-    bow_df = pd.DataFrame(X.toarray(), columns=vectorizer.get_feature_names_out(), index=emoji_df['username'])
+    emojies = vectorizer.get_feature_names_out()
 
-    return bow_df
+    if method == 'Most Frequent':
 
+        bow_df = pd.DataFrame(X.toarray(), columns=emojies, index=emoji_df['username'])
+
+        top_fre_emoji = pd.DataFrame(bow_df.idxmax(axis=1)).reset_index() \
+            .rename(columns={0: 'top_freq_emoji'})
+    else:
+
+        ctfidf = CTFIDFVectorizer().fit_transform(X, n_samples=len(emoji_df)).toarray()
+        words_per_class_min = {user_name: [emojies[index] for index in ctfidf[label].argsort()[-1:]]
+                               for label, user_name in zip(emoji_df.username.index, emoji_df.username)}
+
+        return pd.DataFrame(words_per_class_min).T.reset_index()\
+            .rename(columns={0: 'top_freq_emoji','index':'username'})
+
+    return top_fre_emoji
 
 
 def detect_lang(df, n_sample=30, min_text_length=10):
@@ -156,3 +173,28 @@ def run_ctfidf(users_text, stop_words, top_words=5):
                            for label, user_name in zip(users_text.username.index, users_text.username)}
 
     return pd.DataFrame(words_per_class_min)
+
+
+
+# def run_emoji_ctfidf(users_text, stop_words, top_words=5):
+#
+#
+#
+#     count_vectorizer = CountVectorizer(stop_words=stop_words,
+#                                        ngram_range=(1, 2),
+#                                        min_df=max(1, n_users) if n_users<=3 else 2).fit(users_text.clean_text)
+#     count = count_vectorizer.transform(users_text.clean_text)
+#     words = count_vectorizer.get_feature_names_out()
+#
+#     nnz_inds = count.nonzero()
+#     keep = np.where(count.data > 2)[0]
+#     n_keep = len(keep)
+#     count = csr_matrix((np.ones(n_keep), (nnz_inds[0][keep], nnz_inds[1][keep])), shape=count.shape)
+#
+#     # Extract top 10 words per class
+#     ctfidf = CTFIDFVectorizer().fit_transform(count, n_samples=len(users_text)).toarray()
+#     words_per_class_min = {user_name: [words[index] for index in ctfidf[label].argsort()[-top_words:]]
+#                            for label, user_name in zip(users_text.username.index, users_text.username)}
+#
+#     return pd.DataFrame(words_per_class_min)
+

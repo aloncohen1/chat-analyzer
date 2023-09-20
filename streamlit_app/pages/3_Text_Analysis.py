@@ -1,38 +1,48 @@
 import streamlit as st
 import streamlit_analytics
 from streamlit_extras.buy_me_a_coffee import button
-from streamlit_extras.dataframe_explorer import dataframe_explorer
-import re
+
 
 from utils.dl_utils import get_conv_df, get_sum_text, wake_up_model
 from utils.general_utils import refer_to_load_data_section, set_background, add_logo, add_filters, local_css
-from streamlit_plotly_events import plotly_events
-from utils.graphs_utils import generate_message_responses_flow, user_message_responses_heatmap, \
-    generate_activity_overtime, generate_piechart, generate_users_activity_overtime
-from utils.text_utils import get_users_top_worlds
-from annotated_text import annotated_text, annotation
+
+from utils.graphs_utils import generate_activity_overtime, generate_piechart, generate_users_activity_overtime
+
+
+COLS_LANG_DICT = {'en': {'date': 'Date', 'week': 'Week', 'month': 'Month', 'timestamp': 'Timestamp',
+                         'username': 'Username', 'message': 'Message'},
+                  'he': {'date': 'תאריך', 'week': 'שבוע', 'month': 'חודש', 'timestamp': 'שעה',
+                         'username': 'משתמש', 'message': 'הודעה'}}
 
 
 def rename_df_cols(df, language, inverse=False):
-    # {col: col.capitalize() for col in df.columns}
-    cols_lang_dict = {'en': {'date':'Date','week':'Week','month':'Month','timestamp':'Timestamp',
-                             'username':'Username','message':'Message'},
-                      'he': {'date':'תאריך','week':'שבוע','month':'חודש','timestamp':'שעה',
-                             'username':'משתמש','message': 'הודעה'}}
+
     if inverse:
-        for lan in cols_lang_dict.keys():
-            cols_lang_dict[lan] = {v: k for k, v in cols_lang_dict[lan].items()}
-    df = df[cols_lang_dict[language].keys()]
-    return df.rename(columns=cols_lang_dict[language])
+        for lan in COLS_LANG_DICT.keys():
+            COLS_LANG_DICT[lan] = {v: k for k, v in COLS_LANG_DICT[lan].items()}
+    df = df[COLS_LANG_DICT[language].keys()]
+    return df.rename(columns=COLS_LANG_DICT[language])
 
 
+# def update(change):
+#     if change == 'slider':
+#         print(st.session_state.slider)
+#     else:
+#         print(st.session_state.date_input)
+#         if len(st.session_state.date_input) > 1:
+#             min_date, max_date = st.session_state.date_input
+#         else:
+#             min_date, max_date = st.session_state.date_input[0], st.session_state.date_input[0] + timedelta(days=1)
+#         st.session_state.slider = min_date, max_date
 
+    # min_date, max_date = st.date_input("", (min_date, max_date), global_min_date, global_max_date, key='date_input',
+    #                                    on_change=update, args=('date_input',))
 
 
 def main():
 
     wake_up_model()
-    st.set_page_config(layout="wide", page_title="Text Analysis", page_icon="🔀")
+    st.set_page_config(layout="wide", page_title="Text Analysis", page_icon="📃")
     add_logo()
     set_background()
 
@@ -40,120 +50,156 @@ def main():
         refer_to_load_data_section()
 
     else:
-        filtered_df, min_date, max_date, language = add_filters()
+        filtered_df, _, _, language = add_filters(add_side_filters=False)
+        min_date, max_date = filtered_df['date'].min(), filtered_df['date'].max()
 
         if st.session_state.get('file_name'):
             st.header(st.session_state.get('file_name'))
-
-        header_text = {'en': 'Text Analysis', 'he': 'ניתוח טקסט'}
-        st.subheader(header_text[language])
 
         st.markdown(local_css("streamlit_app/streamlit/styles/metrics.css"), unsafe_allow_html=True)
 
         conv_df = filtered_df.copy()
 
-        col0, col1 = st.columns((2, 5))
-        with col0:
-            filtered_df = dataframe_explorer(rename_df_cols(filtered_df, language), case=False)
-            filtered_df = rename_df_cols(filtered_df, language, inverse=True)
-        with col1:
-            section_lang_dict = {'en': ["Overall chat Activity", "Activity by user", "Activity Share"],
-                              'he': ["פעילות כללית על פני זמן", "פעילות משתמשים על פני זמן", "אחוז פעילות לפי משתמש"]}
+        global_col, _ = st.columns((1000, 0.10))
+        with global_col:
+            explorer_title_lang_dict = {'en': 'Explode Your Chat', 'he': "חקור/י את הצ'אט שלך"}
+            st.subheader(explorer_title_lang_dict[language])
+            st.divider()
+            filters_col0, filters_col1, filters_col2 = st.columns((1, 1, 2))
+            with filters_col0:
+                date_lang_dict = {'en': 'Period', 'he': "תקופה"}
+                min_date, max_date = st.slider(date_lang_dict[language], min_date, max_date, (min_date, max_date))
+                filtered_df = filtered_df[filtered_df['date'].between(min_date, max_date)]
 
-            tab_0, tab_1, tab_2 = st.tabs(section_lang_dict[language])
-            with tab_0:
-                gran_lang_dict = {'en': ["Monthly", "Weekly", "Daily"], 'he': ["חודשי", "שבועי", "יומי"]}
-                sub0_0, sub0_1, sub0_2 = st.tabs(gran_lang_dict[language])
-                sub0_0.plotly_chart(generate_activity_overtime(filtered_df, min_date, max_date, language, "Messages", 'month'),use_container_width=True)
-                sub0_1.plotly_chart(generate_activity_overtime(filtered_df, min_date, max_date, language, "Messages", 'week'),use_container_width=True)
-                sub0_2.plotly_chart(generate_activity_overtime(filtered_df, min_date, max_date, language, "Messages", 'date'),use_container_width=True)
-            with tab_1:
-                sub1_0, sub1_1, sub1_2 = st.tabs(gran_lang_dict[language])
-                sub1_0.plotly_chart(generate_users_activity_overtime(filtered_df, min_date, max_date, language, "month"),
-                                    use_container_width=True)
-                sub1_1.plotly_chart(generate_users_activity_overtime(filtered_df, min_date, max_date, language, "week"),
-                                    use_container_width=True)
-                sub1_2.plotly_chart(generate_users_activity_overtime(filtered_df, min_date, max_date, language, "date"),
-                                    use_container_width=True)
+            with filters_col1:
+                users_lang_dict = {'en': 'Users', 'he': "משתמשים"}
+                all_dict = {'en': 'All', 'he': "כולם"}
+                users_filter = st.multiselect(users_lang_dict[language],
+                                              [all_dict[language]] + list(st.session_state['data']['username'].unique()),
+                                              default=all_dict[language])
+                if all_dict[language] in users_filter or not users_filter:
+                    pass
+                else:
+                    filtered_df = filtered_df[filtered_df['username'].isin(users_filter)]
 
-            tab_2.plotly_chart(generate_piechart(filtered_df, language), use_container_width=True)
-        if not filtered_df.empty:
-            st.dataframe(rename_df_cols(filtered_df, language), use_container_width=True)
+            with filters_col2:
+                text_input_lang = {'en': "Search by Text", 'he': "טקסט"}
+                free_text = st.text_input(text_input_lang[language])
+                if free_text:
+                    filtered_df = filtered_df[filtered_df['message'].str.lower().str.contains(free_text)]
+            st.divider()
+            col0, col1 = st.columns((5, 5))
+            with col0:
 
-        summrizer_title_lang_dict = {'en': 'Conversations Summarizer (Beta)', 'he': '(Beta) מסכם שיחות'}
-        st.subheader(summrizer_title_lang_dict[language])
+                filtered_df = rename_df_cols(filtered_df, language)
 
-        col1, col2, col3 = st.columns((2, 5, 5))
+                temp_df = filtered_df[[COLS_LANG_DICT[language]['username'],
+                                       COLS_LANG_DICT[language]['timestamp'],
+                                       COLS_LANG_DICT[language]['message']]]
 
-        conv_agg_df = get_conv_df(conv_df)
+                temp_df[COLS_LANG_DICT[language]['message']] = temp_df[COLS_LANG_DICT[language]['username']] \
+                                                               + ' ('+ temp_df[COLS_LANG_DICT[language]['timestamp']]\
+                                                                   .astype(str)+ '): ' + \
+                                                               temp_df[COLS_LANG_DICT[language]['message']]
 
-        with col1:
-            date_selector_lng_dict = {'en': 'Select a Date', 'he': 'בחר תאריך'}
-            month_selector_lng_dict = {'en': 'Select a Month', 'he': 'בחר חודש'}
-            conf_filed_lan_dict = {'en': 'Conversation', 'he': "שיחה"}
+                st.dataframe(temp_df[COLS_LANG_DICT[language]['message']], use_container_width=True, height=560, hide_index=True)
+                filtered_df = rename_df_cols(filtered_df, language, inverse=True)
+            with col1:
+                section_lang_dict = {'en': ["Overall chat Activity", "Activity by user", "Activity Share"],
+                                  'he': ["פעילות כללית על פני זמן", "פעילות משתמשים על פני זמן", "אחוז פעילות לפי משתמש"]}
 
-            month = st.selectbox(month_selector_lng_dict[language], conv_agg_df['month'].unique())
+                tab_0, tab_1, tab_2 = st.tabs(section_lang_dict[language])
+                with tab_0:
+                    gran_lang_dict = {'en': ["Monthly", "Weekly", "Daily"], 'he': ["חודשי", "שבועי", "יומי"]}
+                    sub0_0, sub0_1, sub0_2 = st.tabs(gran_lang_dict[language])
+                    sub0_0.plotly_chart(generate_activity_overtime(filtered_df, min_date, max_date, language, "Messages", 'month'),use_container_width=True)
+                    sub0_1.plotly_chart(generate_activity_overtime(filtered_df, min_date, max_date, language, "Messages", 'week'),use_container_width=True)
+                    sub0_2.plotly_chart(generate_activity_overtime(filtered_df, min_date, max_date, language, "Messages", 'date'),use_container_width=True)
+                with tab_1:
+                    sub1_0, sub1_1, sub1_2 = st.tabs(gran_lang_dict[language])
+                    sub1_0.plotly_chart(generate_users_activity_overtime(filtered_df, min_date, max_date, language, "month"),
+                                        use_container_width=True)
+                    sub1_1.plotly_chart(generate_users_activity_overtime(filtered_df, min_date, max_date, language, "week"),
+                                        use_container_width=True)
+                    sub1_2.plotly_chart(generate_users_activity_overtime(filtered_df, min_date, max_date, language, "date"),
+                                        use_container_width=True)
 
-            date = st.selectbox(date_selector_lng_dict[language],
-                                conv_agg_df[conv_agg_df['month'] == month]['date'].unique())
-            conv_df_to_sum = conv_agg_df[conv_agg_df['date'] == date][['preproc_text']] \
-                .rename({'preproc_text': 'Conversation'}).reset_index(drop=True)
-            conv_df_to_sum['Conversations'] = f'{conf_filed_lan_dict[language]} ' + (conv_df_to_sum.index+1).astype(str)
+                tab_2.plotly_chart(generate_piechart(filtered_df, language), use_container_width=True)
 
-            conv_selector_lang_dict = {'en': 'Select a Conversation', 'he': "בחר שיחה"}
-            all_lang_dict = {'en': 'All', 'he': "כל השיחות"}
-            conv = st.selectbox(conv_selector_lang_dict[language],[all_lang_dict[language]] + conv_df_to_sum['Conversations'].to_list())
-            # st.metric(f'Overall Conversations', len(conv_df_to_sum))
-            st.write('')
-            st.write('')
-            st.write('')
-            button_lang_dict = {'en': 'Summarize Conversations', 'he': "סכם שיחות"}
-            sum_bool = st.button(button_lang_dict[language])
-        if conv not in all_lang_dict.values():
-            orig_text = conv_df_to_sum[conv_df_to_sum['Conversations'] == conv]['preproc_text'].iloc[0]
-            orig_text = [orig_text]
-            conv_ids = [conv]
-        else:
-            orig_text = conv_df_to_sum["preproc_text"].to_list()
-            conv_ids = conv_df_to_sum["Conversations"].to_list()
-        orig_text_lang_dict = {'en': "Original Conversation", 'he': "שיחה מקורית"}
-        col2.subheader(orig_text_lang_dict[language])
-        col2.write("------")
-        for conv_id, orig_text_i in zip(conv_ids, orig_text):
-            # col2.write(f'Conversation {conv_index}')
-            col2.markdown(f'<div style="text-align: right;"><b><u>{conv_id}</b></u></div>', unsafe_allow_html=True)
-            for index, row in enumerate(orig_text_i.split('\n')):
-                col2.write(row)
+        global_col1, _ = st.columns((1000, 0.1))
+        with global_col1:
+            summrizer_title_lang_dict = {'en': 'Conversations Summarizer (Beta)', 'he': '(Beta) מסכם שיחות'}
+            st.subheader(summrizer_title_lang_dict[language])
+            st.divider()
+
+            col1, col2, col3 = st.columns((2, 5, 5))
+
+            conv_agg_df = get_conv_df(conv_df)
+
+            with col1:
+                date_selector_lng_dict = {'en': 'Select a Date', 'he': 'בחר תאריך'}
+                month_selector_lng_dict = {'en': 'Select a Month', 'he': 'בחר חודש'}
+                conf_filed_lan_dict = {'en': 'Conversation', 'he': "שיחה"}
+
+                month = st.selectbox(month_selector_lng_dict[language], conv_agg_df['month'].unique())
+
+                date = st.selectbox(date_selector_lng_dict[language],
+                                    conv_agg_df[conv_agg_df['month'] == month]['date'].unique())
+                conv_df_to_sum = conv_agg_df[conv_agg_df['date'] == date][['preproc_text']] \
+                    .rename({'preproc_text': 'Conversation'}).reset_index(drop=True)
+                conv_df_to_sum['Conversations'] = f'{conf_filed_lan_dict[language]} ' + (conv_df_to_sum.index+1).astype(str)
+
+                conv_selector_lang_dict = {'en': 'Select a Conversation', 'he': "בחר שיחה"}
+                all_lang_dict = {'en': 'All', 'he': "כל השיחות"}
+                conv = st.selectbox(conv_selector_lang_dict[language],[all_lang_dict[language]] + conv_df_to_sum['Conversations'].to_list())
+                # st.metric(f'Overall Conversations', len(conv_df_to_sum))
+                st.write('')
+                st.write('')
+                st.write('')
+                button_lang_dict = {'en': 'Summarize Conversations', 'he': "סכם שיחות"}
+                sum_bool = st.button(button_lang_dict[language])
+            if conv not in all_lang_dict.values():
+                orig_text = conv_df_to_sum[conv_df_to_sum['Conversations'] == conv]['preproc_text'].iloc[0]
+                orig_text = [orig_text]
+                conv_ids = [conv]
+            else:
+                orig_text = conv_df_to_sum["preproc_text"].to_list()
+                conv_ids = conv_df_to_sum["Conversations"].to_list()
+            orig_text_lang_dict = {'en': "Original Conversation", 'he': "שיחה מקורית"}
+            col2.subheader(orig_text_lang_dict[language])
             col2.write("------")
-            # direct = 'left' if index % 2 == 0 else 'right'
-            # col2.markdown(f'<div style="text-align: {direct};">{row}</div>', unsafe_allow_html=True)
+            for conv_id, orig_text_i in zip(conv_ids, orig_text):
+                # col2.write(f'Conversation {conv_index}')
+                col2.markdown(f'<div style="text-align: right;"><b><u>{conv_id}</b></u></div>', unsafe_allow_html=True)
+                for index, row in enumerate(orig_text_i.split('\n')):
+                    col2.write(row)
+                col2.write("------")
+                # direct = 'left' if index % 2 == 0 else 'right'
+                # col2.markdown(f'<div style="text-align: {direct};">{row}</div>', unsafe_allow_html=True)
 
-        with col3:
-            sum_text_lang_dict = {'en': "Summarized Conversation", 'he': "שיחה מסוכמת"}
-            st.subheader(sum_text_lang_dict[language])
-            st.write("------")
-            if sum_bool:
-                with st.spinner('Summarizing...'):
-                    try:
-                        preds = get_sum_text(conv_df_to_sum['preproc_text'].to_list())
-                        conv_df_to_sum['sum_text'] = preds
+            with col3:
+                sum_text_lang_dict = {'en': "Summarized Conversation", 'he': "שיחה מסוכמת"}
+                st.subheader(sum_text_lang_dict[language])
+                st.write("------")
+                if sum_bool:
+                    with st.spinner('Summarizing...'):
+                        try:
+                            preds = get_sum_text(conv_df_to_sum['preproc_text'].to_list())
+                            conv_df_to_sum['sum_text'] = preds
 
-                        if conv not in all_lang_dict.values():
-                            sum_text = conv_df_to_sum[conv_df_to_sum['Conversations'] == conv]['sum_text'].iloc[0]
-                            sum_text = [sum_text]
-                        else:
-                            sum_text = conv_df_to_sum["sum_text"].to_list()
+                            if conv not in all_lang_dict.values():
+                                sum_text = conv_df_to_sum[conv_df_to_sum['Conversations'] == conv]['sum_text'].iloc[0]
+                                sum_text = [sum_text]
+                            else:
+                                sum_text = conv_df_to_sum["sum_text"].to_list()
 
-                        for conv_id, sum_text_i in zip(conv_ids, sum_text):
-                            st.markdown(f'<div style="text-align: right;"><b><u>{conv_id}</b></u></div>', unsafe_allow_html=True)
-                            st.write(sum_text_i)
-                            st.write("------")
-                    except Exception as e:
-                        st.write("Somthing went wrong, please try again in a few seconds")
-                        st.write(e)
-
-
-
+                            for conv_id, sum_text_i in zip(conv_ids, sum_text):
+                                st.markdown(f'<div style="text-align: right;"><b><u>{conv_id}</b></u></div>', unsafe_allow_html=True)
+                                st.write(sum_text_i)
+                                st.write("------")
+                        except Exception as e:
+                            st.write("Somthing went wrong, please try again in a few seconds")
+                            st.write(e)
 
         #
 

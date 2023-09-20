@@ -118,28 +118,33 @@ def add_metadata_to_df(df):
 
     return df
 
-def add_filters():
+def add_filters(add_side_filters=True):
 
-    min_date = st.session_state['data']['date'].min()
-    max_date = st.session_state['data']['date'].max()
-    if min_date == max_date:
-        max_date = max_date + timedelta(days=1)
+    if add_side_filters:
+        min_date = st.session_state['data']['date'].min()
+        max_date = st.session_state['data']['date'].max()
+        if min_date == max_date:
+            max_date = max_date + timedelta(days=1)
 
-    st.sidebar.write('')
-    time_filter = st.sidebar.slider("Time Period", min_date, max_date, (min_date, max_date))
+        st.sidebar.write('')
+        time_filter = st.sidebar.slider("Time Period", min_date, max_date, (min_date, max_date))
 
-    st.sidebar.write('')
+        st.sidebar.write('')
 
-    users_filter = st.sidebar.multiselect("Users", ["All"] + list(st.session_state['data']['username'].unique()),
-                                          default='All')
-    if "All" in users_filter or not users_filter:
-        filtered_df = st.session_state['data']
+        users_filter = st.sidebar.multiselect("Users", ["All"] + list(st.session_state['data']['username'].unique()),
+                                              default='All')
+        if "All" in users_filter or not users_filter:
+            filtered_df = st.session_state['data']
+        else:
+            filtered_df = st.session_state['data'][st.session_state['data']['username'].isin(users_filter)]
+
+        language = app_language()
+
+        return filtered_df[filtered_df['date'].between(time_filter[0], time_filter[1])], time_filter[0], time_filter[1], language
+
     else:
-        filtered_df = st.session_state['data'][st.session_state['data']['username'].isin(users_filter)]
-
-    language = app_language()
-
-    return filtered_df[filtered_df['date'].between(time_filter[0], time_filter[1])], time_filter[0], time_filter[1], language
+        language = app_language()
+        return st.session_state['data'], None, None, language
 
 def get_locations_markers(df):
     locations_df = df[(df['message'].str.contains('maps.google.com')) &
