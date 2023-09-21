@@ -5,14 +5,16 @@ import pygeohash as pgh
 import numpy as np
 import re
 from datetime import timedelta
-from streamlit_extras.buy_me_a_coffee import button
 
-PAYPALINK = "https://www.paypal.com/donate/?hosted_button_id=DNQGP23BHG3UU"
 
 URL_PATTERN = r"(https:\/\/maps\.google\.com\/\?q=-?\d+\.\d+,-?\d+\.\d+)"
 
 GEOHASH_FOR_EXAMPLE_CHAT = ["dr72", "sr2y", "xn77", "stq4"]
 
+
+def linkedin_link():
+    st.sidebar.markdown(f'''<a href="https://www.linkedin.com/in/alon-cohen-67459988/">
+    <img src="https://www.freeiconspng.com/thumbs/linkedin-logo-png/linkedin-logo-3.png" width="20" height="20"></a><span style="font-size: 15px;">Made by</span> - <a href="https://www.linkedin.com/in/alon-cohen-67459988/">Alon Cohen</a>''',unsafe_allow_html=True)
 
 def app_language():
     language = st.sidebar.selectbox('Language', ['English', 'עברית'])
