@@ -16,6 +16,11 @@ def linkedin_link():
     st.sidebar.markdown(f'''<a href="https://www.linkedin.com/in/alon-cohen-67459988/">
     <img src="https://www.freeiconspng.com/thumbs/linkedin-logo-png/linkedin-logo-3.png" width="20" height="20"></a><span style="font-size: 15px;">Made by</span> - <a href="https://www.linkedin.com/in/alon-cohen-67459988/">Alon Cohen</a>''',unsafe_allow_html=True)
 
+def form_link():
+    st.sidebar.markdown(f'''<a href="https://forms.gle/ANxMW26QF1c1DmZQA">
+    <img src="https://cdn-icons-png.flaticon.com/512/2875/2875337.png" width="20" height="20"></a><span style="font-size: 12px;">Ask a feature / report a bug / send a feedback</span>''',unsafe_allow_html=True)
+
+
 def app_language():
     language = st.sidebar.selectbox('Language', ['English', 'עברית'])
     language = 'en' if language == "English" else 'he'

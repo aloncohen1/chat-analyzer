@@ -5,7 +5,7 @@ from streamlit_extras.buy_me_a_coffee import button
 
 from utils.dl_utils import get_conv_df, get_sum_text, wake_up_model
 from utils.general_utils import refer_to_load_data_section, set_background, add_logo, add_filters, local_css, \
-    linkedin_link
+    linkedin_link, form_link
 
 from utils.graphs_utils import generate_activity_overtime, generate_piechart, generate_users_activity_overtime
 
@@ -258,4 +258,5 @@ if __name__ == "__main__":
     main()
     button(username="bigalon1991", width=221)
     linkedin_link()
+    form_link()
     streamlit_analytics.stop_tracking()
