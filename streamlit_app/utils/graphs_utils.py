@@ -115,7 +115,7 @@ def generate_users_activity_overtime(df, min_date, max_date, language='en', gran
                                 'en': {'month': 'month', 'week': 'week', 'date': 'day'}}
         messages_lang_dict = {'en': '# of Messages', 'he': "# הודעות"}
         username_lang_dict = {'en': 'Username', 'he': "משתמש"}
-        plot_title = {'en': 'Users Activity Over Time (Top %s)', 'he': "(Top %s) טרנד פעילות כללית על פני זמן"}
+        plot_title = {'en': 'Users Activity Over Time (Top %s)', 'he': "(Top %s) טרנד פעילות משתמשים על פני זמן"}
 
         top_n = min(top_n, df["username"].nunique())
 

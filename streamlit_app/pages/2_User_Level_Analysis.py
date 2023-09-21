@@ -1,11 +1,9 @@
 import streamlit as st
 import streamlit_analytics
 import numpy as np
-from utils.general_utils import refer_to_load_data_section, set_background, add_logo, add_filters, local_css
+from utils.general_utils import refer_to_load_data_section, set_background, add_logo, add_filters
 from streamlit_extras.buy_me_a_coffee import button
-from utils.graphs_utils import generate_message_responses_flow
 from PIL import Image
-import pandas as pd
 import emoji
 from utils.text_utils import get_top_emojis
 
@@ -125,11 +123,11 @@ def main():
 
         if st.session_state.get('file_name'):
             st.header(st.session_state.get('file_name'))
-        top_col, _ = st.columns((1000,0.1))
-        with top_col:
 
-            header_text = {'en': 'User Level Analysis', 'he': 'ניתוח משתמשים'}
-            st.subheader(header_text[language])
+        header_text = {'en': 'User Level Analysis', 'he': 'ניתוח משתמשים'}
+        st.subheader(header_text[language])
+        top_col, _ = st.columns((1000, 0.1))
+        with top_col:
             pct_lang_dict = {'en': "Show Percentages", "he":'הצג אחוזים'}
 
             method_lang_dict = {'en': {"Most Associated":"Most Associated",

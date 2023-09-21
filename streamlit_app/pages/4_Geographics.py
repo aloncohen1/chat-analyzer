@@ -88,7 +88,7 @@ def main():
 
             col1, col2 = st.columns((10, 6))
             loc_lang_dict = {'en': "Overall Locations", "he": 'סה"כ מיקומים'}
-            users_lang_dict = {'en': "Overall Users", "he": 'סה"כ משתמשים'}
+            users_lang_dict = {'en': "Overall Users with Locations", "he": 'סה"כ משתמשים ששלחו מיקום'}
             col1.metric(loc_lang_dict[language], locations_df.shape[0])
             col2.metric(users_lang_dict[language], locations_df['username'].nunique())
             col2, col3 = st.columns((10, 6))
@@ -104,10 +104,13 @@ def main():
                 st.plotly_chart(generate_geo_piehart(filtered_locations_df, language), use_container_width=True)
 
             filtered_locations_df = filter_locations_df(st.session_state['geo_data'], locations_df, min_date, max_date)
-
-            col4, col5 = st.columns((6, 8))
-            col4.plotly_chart(generate_geo_barchart(filtered_locations_df, language, "city"), use_container_width=True)
-            col5.plotly_chart(generate_geo_barchart(filtered_locations_df, language, "road"), use_container_width=True)
+            general_col, _ = st.columns((1000, 1))
+            with general_col:
+                road_city_lang_dict = {'en': 'Top Cities & Roads', 'he': 'התפלגות מיקומים על פני ערים ורחובות'}
+                st.subheader(road_city_lang_dict[language])
+                col4, col5 = st.columns((6, 8))
+                col4.plotly_chart(generate_geo_barchart(filtered_locations_df, language, "city"), use_container_width=True)
+                col5.plotly_chart(generate_geo_barchart(filtered_locations_df, language, "road"), use_container_width=True)
 
         else:
             no_loc_lang_dict = {"en": 'No Locations to show', "he": "הדאטא אינו מכיל מיקומים לניתוח"}

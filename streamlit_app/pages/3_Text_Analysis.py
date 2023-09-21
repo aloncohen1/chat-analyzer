@@ -60,6 +60,9 @@ def main():
 
         conv_df = filtered_df.copy()
 
+        global_title_lang_dict = {'en': 'Text Analysis', 'he': "ניתוח טקסט"}
+        st.subheader(global_title_lang_dict[language])
+
         global_col, _ = st.columns((1000, 0.10))
         with global_col:
             explorer_title_lang_dict = {'en': 'Explode Your Chat', 'he': "חקור/י את הצ'אט שלך"}
@@ -86,7 +89,7 @@ def main():
                 text_input_lang = {'en': "Search by Text", 'he': "טקסט"}
                 free_text = st.text_input(text_input_lang[language])
                 if free_text:
-                    filtered_df = filtered_df[filtered_df['message'].str.lower().str.contains(free_text)]
+                    filtered_df = filtered_df[filtered_df['message'].str.lower().str.contains(free_text.lower())]
             st.divider()
             col0, col1 = st.columns((5, 5))
             with col0:
