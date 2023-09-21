@@ -25,7 +25,7 @@ def main():
         header_text = {'en': 'Users Interaction', 'he': 'אינטראקציית משתמשים'}
         st.subheader(header_text[language])
 
-        st.markdown(local_css("streamlit/styles/metrics.css"), unsafe_allow_html=True)
+        st.markdown(local_css("add_ons/styles/metrics.css"), unsafe_allow_html=True)
 
         st.plotly_chart(generate_message_responses_flow(filtered_df, language, 5), use_container_width=True)
         st.plotly_chart(user_message_responses_heatmap(filtered_df, language, 10), use_container_width=True)

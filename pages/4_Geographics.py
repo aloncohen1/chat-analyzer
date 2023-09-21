@@ -70,7 +70,7 @@ def main():
         st.subheader(header_text[language])
 
         if not locations_df.empty:
-            st.markdown(local_css("streamlit/styles/metrics.css"), unsafe_allow_html=True)
+            st.markdown(local_css("add_ons/styles/metrics.css"), unsafe_allow_html=True)
 
             top_freq_geohash = locations_df['geohash'].value_counts().index[0]
 

@@ -8,7 +8,7 @@ from PIL import Image
 import emoji
 from utils.text_utils import get_top_emojis
 
-USER_IMAGE = Image.open("streamlit/styles/logos/user_logo.jpg")
+USER_IMAGE = Image.open("add_ons/styles/logos/user_logo.jpg")
 
 def human_format(num, pct=True):
     if pct:

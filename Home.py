@@ -12,7 +12,7 @@ from utils.general_utils import add_metadata_to_df, set_background, add_logo, ge
     app_language, linkedin_link, form_link
 from utils.parsers import parse_telegram_html
 
-PROD_IMAGE = Image.open("streamlit/styles/logos/prod_image.png")
+PROD_IMAGE = Image.open("add_ons/styles/logos/prod_image.png")
 
 WHATSAPP_IMAGE_PATH = 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/WhatsApp.svg/240px-WhatsApp.svg.png'
 TELEGRAM_IMAGE_PATH = 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Telegram_2019_Logo.svg/242px-Telegram_2019_Logo.svg.png'
