@@ -56,7 +56,7 @@ def main():
         if st.session_state.get('file_name'):
             st.header(st.session_state.get('file_name'))
 
-        st.markdown(local_css("streamlit_app/streamlit/styles/metrics.css"), unsafe_allow_html=True)
+        st.markdown(local_css("streamlit/styles/metrics.css"), unsafe_allow_html=True)
 
         conv_df = filtered_df.copy()
 
