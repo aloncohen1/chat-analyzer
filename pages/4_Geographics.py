@@ -7,9 +7,9 @@ import streamlit_analytics
 from streamlit_folium import st_folium
 import folium
 
-from utils.general_utils import refer_to_load_data_section, set_background, add_logo, add_filters, \
+from app_utils.general_utils import refer_to_load_data_section, set_background, add_logo, add_filters, \
     get_locations_markers, local_css, linkedin_link, form_link
-from utils.graphs_utils import generate_geo_barchart, generate_geo_piehart
+from app_utils.graphs_utils import generate_geo_barchart, generate_geo_piehart
 from streamlit_extras.buy_me_a_coffee import button
 
 

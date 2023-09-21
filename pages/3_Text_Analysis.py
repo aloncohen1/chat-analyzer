@@ -3,11 +3,11 @@ import streamlit_analytics
 from streamlit_extras.buy_me_a_coffee import button
 
 
-from utils.dl_utils import get_conv_df, get_sum_text, wake_up_model
-from utils.general_utils import refer_to_load_data_section, set_background, add_logo, add_filters, local_css, \
+from app_utils.dl_utils import get_conv_df, get_sum_text, wake_up_model
+from app_utils.general_utils import refer_to_load_data_section, set_background, add_logo, add_filters, local_css, \
     linkedin_link, form_link
 
-from utils.graphs_utils import generate_activity_overtime, generate_piechart, generate_users_activity_overtime
+from app_utils.graphs_utils import generate_activity_overtime, generate_piechart, generate_users_activity_overtime
 
 
 COLS_LANG_DICT = {'en': {'date': 'Date', 'week': 'Week', 'month': 'Month', 'timestamp': 'Timestamp',

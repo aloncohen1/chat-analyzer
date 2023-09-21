@@ -2,9 +2,9 @@ import streamlit as st
 import streamlit_analytics
 from streamlit_extras.buy_me_a_coffee import button
 
-from utils.general_utils import refer_to_load_data_section, set_background, add_logo, add_filters, local_css, \
+from app_utils.general_utils import refer_to_load_data_section, set_background, add_logo, add_filters, local_css, \
     linkedin_link, form_link
-from utils.graphs_utils import generate_message_responses_flow, user_message_responses_heatmap
+from app_utils.graphs_utils import generate_message_responses_flow, user_message_responses_heatmap
 
 
 

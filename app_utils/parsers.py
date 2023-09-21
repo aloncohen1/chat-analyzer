@@ -15,14 +15,14 @@ class HFormatError(Exception):
     pass
 
 class ColnamesDf:
-    """Access class constants using variable ``whatstk.utils.utils.COLNAMES_DF``.
+    """Access class constants using variable ``whatstk.app_utils.app_utils.COLNAMES_DF``.
 
     Example:
             Access constant ``COLNAMES_DF.DATE``:
 
             ..  code-block:: python
 
-                >>> from whatstk.utils.utils import COLNAMES_DF
+                >>> from whatstk.app_utils.app_utils import COLNAMES_DF
                 >>> COLNAMES_DF.DATE
                 'date'
 

@@ -6,11 +6,11 @@ from streamlit_extras.switch_page_button import switch_page
 from streamlit_extras.buy_me_a_coffee import button
 
 import streamlit as st
-from utils.parsers import _df_from_str
+from app_utils.parsers import _df_from_str
 
-from utils.general_utils import add_metadata_to_df, set_background, add_logo, generate_synthetic_locations, \
+from app_utils.general_utils import add_metadata_to_df, set_background, add_logo, generate_synthetic_locations, \
     app_language, linkedin_link, form_link
-from utils.parsers import parse_telegram_html
+from app_utils.parsers import parse_telegram_html
 
 PROD_IMAGE = Image.open("add_ons/styles/logos/prod_image.png")
 
