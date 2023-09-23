@@ -6,7 +6,7 @@ import pandas as pd
 from googletrans import Translator
 import streamlit as st
 
-API_TOKEN ='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'
+API_TOKEN = st.secrets["hf_api_token"]
 API_URL = "https://api-inference.huggingface.co/models/philschmid/bart-large-cnn-samsum"
 # API_URL = "https://api-inference.huggingface.co/models/facebook/bart-large-cnn"
 
