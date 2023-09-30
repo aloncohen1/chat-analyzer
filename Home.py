@@ -35,7 +35,7 @@ def load_test_data():
 
 
 def load_data(files):
-    progress_bar = st.progress(0, text="Uploading...")
+    progress_bar = st.progress(0, text="Processing...")
     df_list = []
     for index, file in enumerate(files):
         if file.name.endswith('.txt'):
@@ -44,11 +44,13 @@ def load_data(files):
                 .replace('WhatsApp Chat with', '').replace('_','')
 
         elif file.name.endswith('.html'):
-            group_name, group_df = parse_telegram_html(file.read().decode())
-            st.session_state['file_name'] = group_name
-            df_list.append(group_df)
-
-        progress_bar.progress(((index + 1) / len(files)), text="Uploading...")
+            try:
+                group_name, group_df = parse_telegram_html(file.read().decode())
+                st.session_state['file_name'] = group_name
+                df_list.append(group_df)
+            except:
+                print(file.name)
+        progress_bar.progress(((index + 1) / len(files)), text="Processing...")
     final_df = add_metadata_to_df(pd.concat(df_list, ignore_index=True)).sort_values('timestamp')
     st.session_state['data'] = final_df
     st.session_state['lang'] = None

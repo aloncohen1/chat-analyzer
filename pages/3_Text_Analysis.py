@@ -66,7 +66,7 @@ def main():
 
         global_col, _ = st.columns((1000, 0.10))
         with global_col:
-            explorer_title_lang_dict = {'en': 'Explode Your Chat', 'he': "חקור/י את הצ'אט שלך"}
+            explorer_title_lang_dict = {'en': 'Explore Your Chat', 'he': "חקור/י את הצ'אט שלך"}
             st.subheader(explorer_title_lang_dict[language])
             st.divider()
             filters_col0, filters_col1, filters_col2 = st.columns((1, 1, 2))
