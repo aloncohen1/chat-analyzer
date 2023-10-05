@@ -37,4 +37,4 @@ if __name__ == "__main__":
     button(username="bigalon1991", width=221)
     linkedin_link()
     form_link()
-    streamlit_analytics.stop_tracking()
+    streamlit_analytics.stop_tracking(unsafe_password=st.secrets["tracking_pass"])
