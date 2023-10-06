@@ -11,14 +11,17 @@ from app_utils.parsers import _df_from_str
 from app_utils.general_utils import add_metadata_to_df, set_background, add_logo, generate_synthetic_locations, \
     app_language, linkedin_link, form_link
 from app_utils.parsers import parse_telegram_html
+import streamlit.components.v1 as components
 
-PROD_IMAGE = Image.open("add_ons/styles/logos/prod_image.png")
+# PROD_IMAGE = Image.open("add_ons/styles/logos/prod_image.png")
 
 WHATSAPP_IMAGE_PATH = 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/WhatsApp.svg/240px-WhatsApp.svg.png'
 TELEGRAM_IMAGE_PATH = 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Telegram_2019_Logo.svg/242px-Telegram_2019_Logo.svg.png'
 
 CHAT_EXAMPLE_PATH = 'example_chat.txt'
 
+with open('add_ons/styles/prod_sliding_photos.html') as f:
+    prod_sliding_photos = f.read()
 
 def load_test_data():
     progress_bar = st.progress(0, text="Loading...")
@@ -95,7 +98,8 @@ def main():
 
     prod_photo_holder = st.empty()
     with prod_photo_holder:
-        st.image(PROD_IMAGE, width=1000)
+
+        components.html(prod_sliding_photos, height=800, width=1200)
 
     how_to_text_holder = st.empty()
     how_to_pic_holder = st.empty()
@@ -136,7 +140,6 @@ def main():
     elif load_test:
         info_place.empty()
         prod_photo_holder.empty()
-        test_file_holder.empty()
         uploading_holder.empty()
         home_holder.empty()
         how_to_text_holder.empty()
