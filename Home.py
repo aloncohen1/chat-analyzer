@@ -6,12 +6,17 @@ from streamlit_extras.switch_page_button import switch_page
 from streamlit_extras.buy_me_a_coffee import button
 
 import streamlit as st
+
 from app_utils.parsers import _df_from_str
 
 from app_utils.general_utils import add_metadata_to_df, set_background, add_logo, generate_synthetic_locations, \
     app_language, linkedin_link, form_link
 from app_utils.parsers import parse_telegram_html
 import streamlit.components.v1 as components
+
+google_site_verification_code = st.secrets['google_site_verification_code']
+meta_tag = f'<meta name="google-site-verification" content="{google_site_verification_code}" />'
+st.markdown(meta_tag, unsafe_allow_html=True)
 
 # PROD_IMAGE = Image.open("add_ons/styles/logos/prod_image.png")
 
