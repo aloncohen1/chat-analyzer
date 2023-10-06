@@ -14,10 +14,6 @@ from app_utils.general_utils import add_metadata_to_df, set_background, add_logo
 from app_utils.parsers import parse_telegram_html
 import streamlit.components.v1 as components
 
-google_site_verification_code = st.secrets['google_site_verification_code']
-meta_tag = f'<meta name="google-site-verification" content="{google_site_verification_code}" />'
-st.markdown(meta_tag, unsafe_allow_html=True)
-
 # PROD_IMAGE = Image.open("add_ons/styles/logos/prod_image.png")
 
 WHATSAPP_IMAGE_PATH = 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/WhatsApp.svg/240px-WhatsApp.svg.png'
@@ -68,8 +64,10 @@ def load_data(files):
 
 
 def main():
-
     st.set_page_config(layout="wide", page_title="Hello", page_icon="👋")
+    google_site_verification_code = st.secrets['google_site_verification_code']
+    meta_tag = f'<meta name="google-site-verification" content="{google_site_verification_code}" />'
+    st.markdown(meta_tag, unsafe_allow_html=True)
 
     set_background()
 
