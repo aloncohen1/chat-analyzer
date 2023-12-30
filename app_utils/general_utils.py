@@ -84,15 +84,16 @@ def refer_to_load_data_section():
 
 
 def set_background():
+    pass
     page_bg_img = '''
-    <style>
-    .stApp {
-    background-image: url("https://w0.peakpx.com/wallpaper/580/650/HD-wallpaper-whatsapp-bg-dark-background.jpg");
-    background-size: contain;
-    }
-    </style>
-    '''
-    return st.markdown(page_bg_img, unsafe_allow_html=True)
+    # <style>
+    # .stApp {
+    # background-image: url("https://w0.peakpx.com/wallpaper/580/650/HD-wallpaper-whatsapp-bg-dark-background.jpg");
+    # background-size: contain;
+    # }
+    # </style>
+    # '''
+    # st.markdown(page_bg_img, unsafe_allow_html=True)
 
 
 def add_conversation_id(df):
