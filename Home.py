@@ -64,7 +64,7 @@ def load_data(files):
 
 
 def main():
-    st.set_page_config(layout="wide", page_title="Hello", page_icon="👋")
+    # st.set_page_config(layout="wide", page_title="Hello", page_icon="👋")
     google_site_verification_code = st.secrets['google_site_verification_code']
     meta_tag = f'<meta name="google-site-verification" content="{google_site_verification_code}" />'
     st.markdown(meta_tag, unsafe_allow_html=True)
@@ -101,8 +101,8 @@ def main():
 
     prod_photo_holder = st.empty()
     with prod_photo_holder:
-
-        components.html(prod_sliding_photos, height=800, width=1200)
+        st.markdown("![Alt Text](https://github.com/aloncohen1/chat-analyzer/assets/42881311/ca7d0912-792b-4519-bd6f-b2732b84a21b)")
+        # components.html(prod_sliding_photos, height=800, width=1200)
 
     how_to_text_holder = st.empty()
     how_to_pic_holder = st.empty()
@@ -157,7 +157,7 @@ def main():
 if __name__ == "__main__":
     streamlit_analytics.start_tracking()
     main()
-    button(username="bigalon1991", width=221)
+    # button(username="bigalon1991", width=221)
     linkedin_link()
     form_link()
     streamlit_analytics.stop_tracking(unsafe_password=st.secrets["tracking_pass"])
