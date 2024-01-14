@@ -101,7 +101,8 @@ def main():
 
     prod_photo_holder = st.empty()
     with prod_photo_holder:
-        st.markdown("![Alt Text](https://github.com/aloncohen1/chat-analyzer/assets/42881311/ca7d0912-792b-4519-bd6f-b2732b84a21b)")
+        st.markdown('<img src="https://github.com/aloncohen1/chat-analyzer/assets/42881311/ca7d0912-792b-4519-bd6f-b2732b84a21b" alt="drawing" style="width:1390px;"/>',
+                    unsafe_allow_html=True)
         # components.html(prod_sliding_photos, height=800, width=1200)
 
     how_to_text_holder = st.empty()
