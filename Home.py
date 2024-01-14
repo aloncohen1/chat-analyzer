@@ -10,7 +10,7 @@ import streamlit as st
 from app_utils.parsers import _df_from_str
 
 from app_utils.general_utils import add_metadata_to_df, set_background, add_logo, generate_synthetic_locations, \
-    app_language, linkedin_link, form_link
+    app_language, linkedin_link, form_link, buy_me_a_coffee_link
 from app_utils.parsers import parse_telegram_html
 import streamlit.components.v1 as components
 
@@ -101,7 +101,7 @@ def main():
 
     prod_photo_holder = st.empty()
     with prod_photo_holder:
-        st.markdown('<img src="https://github.com/aloncohen1/chat-analyzer/assets/42881311/ca7d0912-792b-4519-bd6f-b2732b84a21b" alt="drawing" style="width:1390px;"/>',
+        st.markdown('<img src="https://github.com/aloncohen1/chat-analyzer/assets/42881311/ca7d0912-792b-4519-bd6f-b2732b84a21b" alt="drawing" style="width:1000px;"/>',
                     unsafe_allow_html=True)
         # components.html(prod_sliding_photos, height=800, width=1200)
 
@@ -158,7 +158,12 @@ def main():
 if __name__ == "__main__":
     streamlit_analytics.start_tracking()
     main()
-    # button(username="bigalon1991", width=221)
+    # button(username="bigalon1991", width=221,floating=False)
     linkedin_link()
     form_link()
+    buy_me_a_coffee_link()
+
+    # button(username="bigalon1991", width=221, floating=False)
+
+
     streamlit_analytics.stop_tracking(unsafe_password=st.secrets["tracking_pass"])
