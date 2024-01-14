@@ -20,6 +20,10 @@ def form_link():
     st.sidebar.markdown(f'''<a href="https://forms.gle/ANxMW26QF1c1DmZQA">
     <img src="https://cdn-icons-png.flaticon.com/512/2875/2875337.png" width="20" height="20"></a><span style="font-size: 12px;">Ask a feature / report a bug / send a feedback</span>''',unsafe_allow_html=True)
 
+def buy_me_a_coffee_link():
+    st.sidebar.markdown(f'''<a href="https://www.buymeacoffee.com/bigalon1991">
+            <img src="https://cdn.iconscout.com/icon/free/png-512/free-buymeacoffee-3521318-2944737.png" width="20" height="20"></a><span style="font-size: 12px;">Buy me a coffee</span>''',
+                        unsafe_allow_html=True)
 
 def app_language():
     language = st.sidebar.selectbox('Language', ['English', 'עברית'])
