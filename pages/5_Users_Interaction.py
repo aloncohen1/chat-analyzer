@@ -3,7 +3,7 @@ import streamlit_analytics
 from streamlit_extras.buy_me_a_coffee import button
 
 from app_utils.general_utils import refer_to_load_data_section, set_background, add_logo, add_filters, local_css, \
-    linkedin_link, form_link
+    linkedin_link, form_link, buy_me_a_coffee_link
 from app_utils.graphs_utils import generate_message_responses_flow, user_message_responses_heatmap
 
 
@@ -34,7 +34,8 @@ def main():
 if __name__ == "__main__":
     streamlit_analytics.start_tracking()
     main()
-    button(username="bigalon1991", width=221)
+    # button(username="bigalon1991", width=221)
     linkedin_link()
     form_link()
+    buy_me_a_coffee_link()
     streamlit_analytics.stop_tracking(unsafe_password=st.secrets["tracking_pass"])
