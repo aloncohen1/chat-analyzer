@@ -534,7 +534,8 @@ def _extract_possible_header_from_line(line: str) -> str:
         header = line_split[0]
         if not header.isprintable():
             header = header.replace("\u200e", "").replace("\u202e", "")
-        if header[-1] != ":":
-            header += ":"
+        if header != '':
+            if header[-1] != ":":
+                header += ":"
         return header
     return None
