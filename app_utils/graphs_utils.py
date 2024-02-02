@@ -1,6 +1,7 @@
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+import altair as alt
 from whatstk import WhatsAppChat
 from whatstk.graph import FigureBuilder
 
@@ -35,7 +36,7 @@ def generate_geo_barchart(df, language='en', geo_key='city', top_n=10):
 
     return fig
 
-def generate_geo_piehart(df, language='en',top_n=10,):
+def generate_geo_piehart(df, language='en',top_n=10):
 
     geo_key = "country"
 
@@ -258,3 +259,31 @@ def user_message_responses_heatmap(df, language='en', n_users=10):
     fig.update_layout(xaxis_title=xaxis_lang_dict[language], yaxis_title=yaxis_lang_dict[language])
 
     return fig
+
+
+def generate_sentiment_piehart(df):
+    region_select = alt.selection_single(fields=["label"], empty="all")
+    region_pie = (
+        (
+            alt.Chart(df)
+            .mark_arc(innerRadius=50)
+            .encode(
+                theta=alt.Theta(
+                    "transaction_amount",
+                    type="quantitative",
+                    aggregate="sum",
+                    title="Sum of Transactions",
+                ),
+                color=alt.Color(
+                    field="region",
+                    type="nominal",
+                    title="Region",
+                ),
+                opacity=alt.condition(region_select, alt.value(1), alt.value(0.25)),
+            )
+        )
+        .add_selection(region_select)
+        .properties(title="Region Sales")
+    )
+
+    return region_pie

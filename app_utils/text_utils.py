@@ -2,7 +2,7 @@ import emoji
 import numpy as np
 import scipy.sparse as sp
 from scipy.sparse import csr_matrix
-import streamlit
+import streamlit as st
 from googletrans import Translator
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer, TfidfVectorizer
 
@@ -69,16 +69,16 @@ def detect_lang(df, n_sample=30, min_text_length=10):
     top_lng = pd.DataFrame([i.lang for i in lang_src],
                            columns=['lang'])['lang'].value_counts().index[0]
 
-    streamlit.session_state['lang'] = top_lng
+    st.session_state['lang'] = top_lng
 
 
 
 
 def get_lang_stop_words(df):
 
-    if not streamlit.session_state.get('lang'):
+    if not st.session_state.get('lang'):
         detect_lang(df)
-    top_lng_name = lgn.langname(streamlit.session_state['lang'])
+    top_lng_name = lgn.langname(st.session_state['lang'])
     if top_lng_name:
         top_lng_name = top_lng_name.lower()
         if top_lng_name in stopwords.fileids():
@@ -93,9 +93,9 @@ def get_lang_stop_words(df):
 
 def get_users_top_worlds(df, n_users=10, top_words=5):
 
-    if not streamlit.session_state.get('lang'):
+    if not st.session_state.get('lang'):
         detect_lang(df)
-    lang = lgn.langname(streamlit.session_state['lang'])
+    lang = lgn.langname(st.session_state['lang'])
     stop_words = get_lang_stop_words(df)
 
     if lang == "hebrew":
@@ -116,8 +116,8 @@ def get_users_top_worlds(df, n_users=10, top_words=5):
     return users_top_worlds.T
 
 
-def clean_text(text, lang):
-    text = re.sub(r"http\S+", "", text).lower()
+def clean_text(text, lang='english', ):
+
     text_list = gensim.utils.simple_preprocess(text)
 
     if lang == "english":
