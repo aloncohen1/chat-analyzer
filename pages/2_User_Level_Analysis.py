@@ -96,7 +96,7 @@ def assign_metrics(col, totals_df, image, user_info, language, add_seperator=Tru
     else:
         col2.metric(emoji_lang_dict[language], 'No Emoji')
 
-    bot = st.button('generate report', key=user_info.username)
+    # bot = st.button('generate report', key=user_info.username)
     if add_seperator:
         st.divider()
 
