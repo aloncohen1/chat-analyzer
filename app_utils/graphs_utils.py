@@ -1,6 +1,7 @@
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+import altair as alt
 from whatstk import WhatsAppChat
 from whatstk.graph import FigureBuilder
 
@@ -35,7 +36,7 @@ def generate_geo_barchart(df, language='en', geo_key='city', top_n=10):
 
     return fig
 
-def generate_geo_piehart(df, language='en',top_n=10,):
+def generate_geo_piehart(df, language='en',top_n=10):
 
     geo_key = "country"
 
@@ -256,5 +257,37 @@ def user_message_responses_heatmap(df, language='en', n_users=10):
                        x=-0.24, yref='y domain', y=-0.55)
 
     fig.update_layout(xaxis_title=xaxis_lang_dict[language], yaxis_title=yaxis_lang_dict[language])
+
+    return fig
+
+
+def generate_sentiment_piehart(df,colors_mapping):
+
+    agg_df = df["label"].value_counts(normalize=True).reset_index()
+
+    agg_df['percent'] = agg_df['label'].apply(lambda x: "{0:.1f}%".format(x * 100))
+
+    fig = px.pie(agg_df, values="label", names='index',color='index', hole=0.5,
+                 hover_data="index",color_discrete_map=colors_mapping)
+
+    fig.update_traces(title_text='Overall Sentiments')
+    fig.update_traces(showlegend=False, textposition='inside', textinfo='percent+label')
+    fig.update_traces(hovertemplate="Label: %{label}<br>Value : %{percent}")
+    fig.update_layout(paper_bgcolor="rgba(18,32,43)", plot_bgcolor="rgba(18,32,43)")
+
+    return fig
+
+def generate_sentiment_bars(df, colors_mapping):
+
+    agg_df = df.groupby(['week', 'label'], as_index=False).agg(n_messages=('sent','count'))
+
+    agg_df['messages_pct'] = agg_df['n_messages'] / agg_df['n_messages'].sum()
+    agg_df['messages_pct_text'] = agg_df['messages_pct'].apply(lambda x: "{0:.1f}%".format(x * 100))
+
+    fig = px.bar(agg_df, x="week", y="messages_pct", hover_data='messages_pct_text',custom_data=['messages_pct_text'],
+                 color="label", title="Sentiment Over Time", color_discrete_map=colors_mapping)
+
+    fig.update_traces(hovertemplate="Label: %{label}<br>Value : %{customdata[0]}")
+    fig.update_layout(yaxis_tickformat='.0%')
 
     return fig

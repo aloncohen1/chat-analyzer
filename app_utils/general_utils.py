@@ -6,8 +6,13 @@ import numpy as np
 import re
 from datetime import timedelta
 
+import nltk
 
-URL_PATTERN = r"(https:\/\/maps\.google\.com\/\?q=-?\d+\.\d+,-?\d+\.\d+)"
+from app_utils.text_utils import clean_text, detect_lang
+
+# nltk.download('wordnet')
+
+GOOGLE_URL_PATTERN = r"(https:\/\/maps\.google\.com\/\?q=-?\d+\.\d+,-?\d+\.\d+)"
 
 GEOHASH_FOR_EXAMPLE_CHAT = ["dr72", "sr2y", "xn77", "stq4"]
 
@@ -99,11 +104,11 @@ def set_background():
     st.markdown(page_bg_img, unsafe_allow_html=True)
 
 
-def add_conversation_id(df):
+def add_conversation_id(df,threshold_quantile=0.9):
 
     df = df.join(df[['timestamp']].shift(-1), lsuffix='', rsuffix='_prev')
     df['time_diff_minutes'] = ((df['timestamp_prev'] - df['timestamp']).dt.seconds / 60)
-    df['conversation_id'] = (df['time_diff_minutes'] >= df['time_diff_minutes'].quantile(0.8)).astype(int).cumsum()
+    df['conversation_id'] = (df['time_diff_minutes'] >= df['time_diff_minutes'].quantile(threshold_quantile)).astype(int).cumsum()
     df.loc[(df['time_diff_minutes'] >= df['time_diff_minutes'].quantile(0.8)), 'conversation_id'] -= 1
     return df.drop('timestamp_prev', axis=1)
 
@@ -111,6 +116,12 @@ def add_conversation_id(df):
 def is_phone_numbers(username):
   pattern = r'^(?=.*[0-9])(?=.*-)(?=.*\+)[0-9\-+]+$'
   return bool(re.match(pattern, username.replace(' ','')))
+
+
+def is_url(messege):
+    pattern = r"http\S+"
+    return bool(re.match(pattern, pattern.replace(' ', '')))
+
 
 def add_metadata_to_df(df):
 
@@ -122,8 +133,11 @@ def add_metadata_to_df(df):
     df['month'] = df['timestamp'].to_numpy().astype('datetime64[M]')
     df['day_name'] = df['timestamp'].dt.day_name()
     df['is_media'] = df['message'].str.contains('<Media omitted>')
-    df['text_length'] = df['message'].apply(lambda x: len(str(x).split(' ')))
-    df['is_phone_number'] = df['username'].apply(lambda x: is_phone_numbers(x))
+    df['text_length'] = df['message'].apply(lambda x: len(str(x).split()))
+    df['user_is_phone_number'] = df['username'].apply(lambda x: is_phone_numbers(x))
+    df['message_has_phone_number'] = df['message'].apply(lambda x: is_phone_numbers(x))
+    df['has_url'] = df['message'].apply(lambda x: is_url(x))
+    df['clean_text'] = df['message'].apply(lambda x: clean_text(x))
 
     df = add_conversation_id(df)
 
@@ -162,7 +176,7 @@ def get_locations_markers(df):
                       (df['message'].str.contains('q='))]
 
     if not locations_df.empty:
-        locations_df['lat'], locations_df['lon'] = zip(*locations_df['message'].str.extract(URL_PATTERN)[0]\
+        locations_df['lat'], locations_df['lon'] = zip(*locations_df['message'].str.extract(GOOGLE_URL_PATTERN)[0]\
                                                        .apply(lambda x: x.split('=')[1].split(',')))
 
         locations_df['lat'], locations_df['lon'] = locations_df['lat'].astype(float), locations_df['lon'].astype(float)

@@ -2,7 +2,7 @@ import emoji
 import numpy as np
 import scipy.sparse as sp
 from scipy.sparse import csr_matrix
-import streamlit
+import streamlit as st
 from googletrans import Translator
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer, TfidfVectorizer
 
@@ -10,15 +10,39 @@ import pandas as pd
 import nltk
 from nltk.stem.porter import PorterStemmer
 from nltk import WordNetLemmatizer
-nltk.download('bcp47')
-nltk.download('stopwords')
+
+if not st.session_state.get('bcp47_downloaded'):
+    nltk.download('bcp47')
+    st.session_state['bcp47_downloaded'] = True
+
+if not st.session_state.get('stopwords_downloaded'):
+    nltk.download('stopwords')
+    st.session_state['stopwords_downloaded'] = True
+
+
 import nltk.langnames as lgn
 from nltk.corpus import stopwords
 import gensim
 import re
+import time
 
 from sklearn.preprocessing import normalize
 
+def stream_data(text,latncy=0.04):
+    for word in text.split():
+        yield word + " "
+        time.sleep(latncy)
+
+
+def human_format(num, pct=True):
+    if pct:
+        return "{0:.0f}%".format(num * 100)
+    else:
+        magnitude = 0
+        while abs(num) >= 1000:
+            magnitude += 1
+            num = round(num / 1000.0, 0)
+        return '{:.{}f}{}'.format(num, 0, ['', 'K', 'M', 'G', 'T', 'P'][magnitude])
 
 def get_users_emoji_df(df, method='top_freq'):
     if method=='top_freq':
@@ -69,16 +93,16 @@ def detect_lang(df, n_sample=30, min_text_length=10):
     top_lng = pd.DataFrame([i.lang for i in lang_src],
                            columns=['lang'])['lang'].value_counts().index[0]
 
-    streamlit.session_state['lang'] = top_lng
+    st.session_state['lang'] = top_lng
 
 
 
 
 def get_lang_stop_words(df):
 
-    if not streamlit.session_state.get('lang'):
+    if not st.session_state.get('lang'):
         detect_lang(df)
-    top_lng_name = lgn.langname(streamlit.session_state['lang'])
+    top_lng_name = lgn.langname(st.session_state['lang'])
     if top_lng_name:
         top_lng_name = top_lng_name.lower()
         if top_lng_name in stopwords.fileids():
@@ -93,9 +117,9 @@ def get_lang_stop_words(df):
 
 def get_users_top_worlds(df, n_users=10, top_words=5):
 
-    if not streamlit.session_state.get('lang'):
+    if not st.session_state.get('lang'):
         detect_lang(df)
-    lang = lgn.langname(streamlit.session_state['lang'])
+    lang = lgn.langname(st.session_state['lang'])
     stop_words = get_lang_stop_words(df)
 
     if lang == "hebrew":
@@ -116,8 +140,8 @@ def get_users_top_worlds(df, n_users=10, top_words=5):
     return users_top_worlds.T
 
 
-def clean_text(text, lang):
-    text = re.sub(r"http\S+", "", text).lower()
+def clean_text(text, lang='english', ):
+
     text_list = gensim.utils.simple_preprocess(text)
 
     if lang == "english":

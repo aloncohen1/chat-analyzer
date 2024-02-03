@@ -7,16 +7,17 @@ from googletrans import Translator
 import streamlit as st
 
 API_TOKEN = st.secrets["hf_api_token"]
-API_URL = "https://api-inference.huggingface.co/models/philschmid/bart-large-cnn-samsum"
-# API_URL = "https://api-inference.huggingface.co/models/facebook/bart-large-cnn"
+API_URL_SAMSUM = "https://api-inference.huggingface.co/models/philschmid/bart-large-cnn-samsum"
+API_URL_SENTIMENT = "https://api-inference.huggingface.co/models/yangheng/deberta-v3-base-absa-v1.1"
 
 headers = {"Authorization": f"Bearer {API_TOKEN}"}
 
-def wake_up_model():
+def wake_up_models():
 
   data = json.dumps({'inputs': 'wake up model',
                     'wait_for_model': True})
-  requests.request("POST", API_URL, headers=headers, data=data)
+  requests.request("POST", API_URL_SAMSUM, headers=headers, data=data)
+  requests.request("POST", API_URL_SENTIMENT, headers=headers, data=data)
 
 
 def preprc_text_for_sum(row):
@@ -47,13 +48,14 @@ def get_conv_df(df, min_users=2, min_messages=4, min_length=8):
     conv_df['month'] = pd.to_datetime(conv_df['date']).dt.to_period('M')
     return conv_df
 
-
-def query_hg(payload):
+st.cache_data(show_spinner=False)
+def query_hg(payload, model_api_url):
     data = json.dumps(payload)
-    response = requests.request("POST", API_URL, headers=headers, data=data)
+    response = requests.request("POST", model_api_url, headers=headers, data=data)
+    print('apply_hg_model - request sent')
     return json.loads(response.content.decode("utf-8"))
 
-
+st.cache_data(show_spinner=False)
 def run_trans(text_list, dest='en'):
     translator = Translator()
     translations = translator.translate(text_list, dest=dest)
@@ -67,19 +69,25 @@ def run_trans(text_list, dest='en'):
 
     return results_list
 
+st.cache_data(show_spinner=False)
+def apply_hg_model(text_list, model_api_url, retries=5, sleep_sec=7):
+
+    pred_text = query_hg({'inputs': text_list, 'wait_for_model': True}, model_api_url)
+
+    retries_counter = 0
+    while retries_counter < retries and isinstance(pred_text, dict):
+        if pred_text.get('error').endswith('currently loading'):
+            sleep(sleep_sec)
+            pred_text = query_hg({'inputs': text_list, 'wait_for_model': True}, model_api_url)
+            retries_counter += 1
+    return pred_text
+
 @st.cache_data(show_spinner=False)
-def get_sum_text(text_list, retries=5, sleep_sec=7):
+def get_sum_text(text_list):
 
     trans_text = run_trans(text_list)
 
-    sum_texts = query_hg({'inputs': [i['translation'] for i in trans_text], 'wait_for_model': True})
-
-    retries_counter = 0
-    while retries_counter < retries and isinstance(sum_texts,dict):
-        if sum_texts.get('error').endswith('currently loading'):
-            sleep(sleep_sec)
-            sum_texts = query_hg({'inputs': [i['translation'] for i in trans_text], 'wait_for_model': True})
-            retries_counter += 1
+    sum_texts = apply_hg_model([i['translation'] for i in trans_text],API_URL_SAMSUM)
 
     top_src = pd.DataFrame(trans_text)['src'].value_counts().index[0]
     if top_src != 'en':
