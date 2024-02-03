@@ -14,7 +14,9 @@ from app_utils.graphs_utils import generate_activity_overtime, generate_piechart
 from app_utils.text_utils import detect_lang, human_format, stream_data
 
 import nltk
-nltk.download('punkt')
+if not st.session_state.get('punkt_downloaded'):
+    nltk.download('punkt')
+    st.session_state['punkt_downloaded'] = True
 from nltk import tokenize
 
 COLS_LANG_DICT = {'en': {'date': 'Date', 'week': 'Week', 'month': 'Month', 'timestamp': 'Timestamp',
@@ -267,7 +269,7 @@ def main():
 
         st.markdown(local_css("add_ons/styles/metrics.css"), unsafe_allow_html=True)
 
-        global_title_lang_dict = {'en': 'Text Analysis', 'he': "ניתוח טקסט"}
+        global_title_lang_dict = {'en': 'Text Analysis (NLP)', 'he': "ניתוח טקסט (NLP)"}
         st.subheader(global_title_lang_dict[language])
 
         trend_tab, sentiment_tab, sum_tab = st.tabs(['**Trends Analysis**', '**Sentiment Analysis**',
