@@ -129,7 +129,7 @@ def get_trends_explorer_widgets(filtered_df, min_date, max_date, language):
 
     global_col, _ = st.columns((1000, 0.10))
     with global_col:
-        explorer_title_lang_dict = {'en': 'Chat Explorer', 'he': "חקור/י את הצ'אט שלך"}
+        explorer_title_lang_dict = {'en': 'Trends Analysis', 'he': "חקור/י את הצ'אט שלך"}
         st.subheader(explorer_title_lang_dict[language])
 
         st.divider()
