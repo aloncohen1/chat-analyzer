@@ -17,9 +17,9 @@ if not st.session_state.get('stopwords_downloaded'):
     nltk.download('stopwords')
     st.session_state['stopwords_downloaded'] = True
 
-if not st.session_state.get('averaged_perceptron_tagger_downloaded'):
-    nltk.download('averaged_perceptron_tagger')
-    st.session_state['averaged_perceptron_tagger_downloaded'] = True
+if not st.session_state.get('wordnet_downloaded'):
+    nltk.download('wordnet')
+    st.session_state['wordnet_downloaded'] = True
 
 
 from nltk.stem.porter import PorterStemmer
