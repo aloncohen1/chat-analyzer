@@ -224,31 +224,37 @@ def get_sentiment_widget(filtered_df, language, max_words=30, max_messages=30, s
         detect_lang(filtered_df)
     chat_lang = st.session_state['lang']
 
-    text_input_lang = {'en': "Select Term", 'he': "בחר מילה"}
-    term = st.text_input(text_input_lang[language], key='sentiment')
+    global_col,_ = st.columns((1000,0.1))
 
-    if not term:
-        pass
-    else:
-        pred_df = calc_sentimnets(filtered_df, term, chat_lang, max_words, max_messages, sample_size)
+    with global_col:
 
-        col0, col1 = st.columns((1,2))
-        # colors_text_dict = {'Negative':'#FEEDEC','Neutral':'#FFF8E0','Positive':'#E4F8ED'}
-        colors_dict = {'Negative':'#ff5a5a','Neutral':'#ffb119','Positive':'#27b966'}
-        col0.plotly_chart(generate_sentiment_piehart(pred_df,colors_dict),use_container_width=True)
-        col1.plotly_chart(generate_sentiment_bars(pred_df,colors_dict),use_container_width=True)
+        st.subheader('Sentiment Analysis')
+        st.divider()
+        text_input_lang = {'en': "Select Term", 'he': "בחר מילה"}
+        term = st.text_input(text_input_lang[language], key='sentiment')
 
-        sent_example_col,_ = st.columns((100,0.1))
+        if not term:
+            pass
+        else:
+            pred_df = calc_sentimnets(filtered_df, term, chat_lang, max_words, max_messages, sample_size)
 
-        with sent_example_col:
-            for _, row in pred_df[['message', 'label','username','timestamp','score']].iterrows():
-                if row.label in colors_dict.keys():
-                    st.write(f'{row.username} ({row.timestamp}):')
-                    annot = ((i+' ', row.label,colors_dict.get(row.label),'black')\
-                                 if term.lower() in i.lower() else i+' ' for i in row.message.split())
-                    annotated_text(*annot)
-                    st.write('*Confidence Score: %s*' % human_format(row.score))
-                    st.divider()
+            col0, col1 = st.columns((1,2))
+            # colors_text_dict = {'Negative':'#FEEDEC','Neutral':'#FFF8E0','Positive':'#E4F8ED'}
+            colors_dict = {'Negative':'#ff5a5a','Neutral':'#ffb119','Positive':'#27b966'}
+            col0.plotly_chart(generate_sentiment_piehart(pred_df,colors_dict),use_container_width=True)
+            col1.plotly_chart(generate_sentiment_bars(pred_df,colors_dict),use_container_width=True)
+
+            sent_example_col,_ = st.columns((100,0.1))
+
+            with sent_example_col:
+                for _, row in pred_df[['message', 'label','username','timestamp','score']].iterrows():
+                    if row.label in colors_dict.keys():
+                        st.write(f'{row.username} ({row.timestamp}):')
+                        annot = ((i+' ', row.label,colors_dict.get(row.label),'black')\
+                                     if term.lower() in i.lower() else i+' ' for i in row.message.split())
+                        annotated_text(*annot)
+                        st.write('*Confidence Score: %s*' % human_format(row.score))
+                        st.divider()
 
 
 def main():
@@ -280,7 +286,6 @@ def main():
 
         with sentiment_tab:
             get_sentiment_widget(filtered_df,language)
-            # st.write('Coming Soon...')
 
         with sum_tab:
             get_summarizer_df(filtered_df, language)
