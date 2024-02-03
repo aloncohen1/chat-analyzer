@@ -1,16 +1,17 @@
 import streamlit as st
 import streamlit_analytics
 import pandas as pd
+import re
 from streamlit_extras.buy_me_a_coffee import button
-
+from annotated_text import annotated_text
 
 from app_utils.dl_utils import get_conv_df, get_sum_text, wake_up_models, run_trans, apply_hg_model, API_URL_SENTIMENT
 from app_utils.general_utils import refer_to_load_data_section, set_background, add_logo, add_filters, local_css, \
     linkedin_link, form_link, buy_me_a_coffee_link
 
 from app_utils.graphs_utils import generate_activity_overtime, generate_piechart, generate_users_activity_overtime, \
-    generate_sentiment_piehart
-from app_utils.text_utils import detect_lang
+    generate_sentiment_piehart, generate_sentiment_bars
+from app_utils.text_utils import detect_lang, human_format, stream_data
 
 import nltk
 nltk.download('punkt')
@@ -107,7 +108,7 @@ def get_summarizer_df(filtered_df, language):
                         for conv_id, sum_text_i in zip(conv_ids, sum_text):
                             st.markdown(f'<div style="text-align: right;"><b><u>{conv_id}</b></u></div>',
                                         unsafe_allow_html=True)
-                            st.write(sum_text_i)
+                            st.write_stream(stream_data(sum_text_i))
                             st.write("------")
                     except Exception as e:
                         st.write("Somthing went wrong, please try again in a few seconds")
@@ -177,8 +178,45 @@ def get_trends_explorer_widgets(filtered_df, min_date, max_date, language):
             tab_2.plotly_chart(generate_piechart(filtered_df, language), use_container_width=True)
 
     return filtered_df
-@st.spinner()
-def get_sentiment_widget(filtered_df, language, max_words=30, max_messages=30):
+
+@st.cache_data(show_spinner=False)
+def calc_sentimnets(filtered_df,term, chat_lang, max_words, max_messages, sample_size):
+    pattern = f'[^a-zA-Zא-ת]{term.lower()}[^a-zA-Zא-ת]'
+    pred_df = filtered_df[(filtered_df['message'].str.lower().str.contains(term.lower())) &
+                          (filtered_df['message'].str.lower().str.contains(pattern)) &
+                          (filtered_df['text_length'] <= max_words)]
+    if len(pred_df) >= max_messages:
+        pred_df = pred_df.groupby(['username', 'month'], group_keys=False) \
+            .apply(lambda x: x.sample(frac=sample_size, replace=True))
+    if not pred_df.empty:
+
+        sent_df = pred_df['message'].map(tokenize.sent_tokenize).explode()
+        sent_df = sent_df[sent_df.str.lower().str.contains(term.lower())].reset_index().rename(
+            columns={'message': 'sent'})
+        sent_df['sent_length'] = sent_df['sent'].str.split().apply(len)
+        sent_df = sent_df.sort_values(['index', 'sent_length']).drop_duplicates(subset=['index'], keep='first')
+
+        sent_df['text_to_trans'] = ('[CLS] ' + sent_df['sent'] + f' [SEP] {term} [SEP]').to_list()
+        sent_df = sent_df.head(min(max_messages, len(sent_df)))
+
+        if chat_lang != 'en':
+            trans_text = run_trans(sent_df['text_to_trans'].to_list())
+            sent_df['text_to_pred'] = [i.get('translation') for i in trans_text]
+        else:
+            sent_df['text_to_pred'] = sent_df['text_to_trans']
+
+        pred_df = pred_df.merge(sent_df, left_index=True, right_on='index')
+
+        sentiments_pred = apply_hg_model(sent_df['text_to_pred'].to_list(), API_URL_SENTIMENT)
+
+        pred_df = pred_df.reset_index(drop=True).join(
+            pd.concat([pd.DataFrame(i).sort_values('score', ascending=False).head(1) for i in sentiments_pred],
+                      ignore_index=True))
+        return pred_df
+
+
+@st.spinner('Caculating Sentiment....')
+def get_sentiment_widget(filtered_df, language, max_words=30, max_messages=30, sample_size=0.2):
 
     if not st.session_state.get('lang'):
         detect_lang(filtered_df)
@@ -190,45 +228,25 @@ def get_sentiment_widget(filtered_df, language, max_words=30, max_messages=30):
     if not term:
         pass
     else:
-        pred_df = filtered_df[(filtered_df['message'].str.lower().str.contains(term.lower())) &
-                              (filtered_df['text_length'] <= max_words)]
-        if len(pred_df) >= max_messages:
-            st.write(len(pred_df))
-            pred_df = pred_df.groupby(['username', 'month'], group_keys=False).apply(lambda x: x.sample(frac=0.2, replace=True))
-            st.write(len(pred_df))
-        if not pred_df.empty:
+        pred_df = calc_sentimnets(filtered_df, term, chat_lang, max_words, max_messages, sample_size)
 
-            sent_df = pred_df['message'].map(tokenize.sent_tokenize).explode()
-            sent_df = sent_df[sent_df.str.lower().str.contains(term.lower())].reset_index().rename(columns={'message':'sent'})
-            sent_df['sent_length'] = sent_df['sent'].str.split().apply(len)
-            sent_df = sent_df.sort_values(['index', 'sent_length']).drop_duplicates(subset=['index'], keep='first')
+        col0, col1 = st.columns((1,2))
+        # colors_text_dict = {'Negative':'#FEEDEC','Neutral':'#FFF8E0','Positive':'#E4F8ED'}
+        colors_dict = {'Negative':'#ff5a5a','Neutral':'#ffb119','Positive':'#27b966'}
+        col0.plotly_chart(generate_sentiment_piehart(pred_df,colors_dict),use_container_width=True)
+        col1.plotly_chart(generate_sentiment_bars(pred_df,colors_dict),use_container_width=True)
 
-            sent_df['text_to_trans'] = ('[CLS] ' + sent_df['sent'] + f' [SEP] {term} [SEP]').to_list()
-            sent_df = sent_df.head(5)
-            # pred_df.shape
-            # pred_df['text_to_pred'] = ('[CLS] ' + pred_df['trans_message'] + f' [SEP] {term_trans} [SEP]').to_list()
-            if chat_lang != 'en':
-                trans_text = run_trans(sent_df['text_to_trans'].to_list())
-                sent_df['text_to_pred'] = [i.get('translation') for i in trans_text]
-            else:
-                sent_df['text_to_pred'] = sent_df['text_to_trans']
+        sent_example_col,_ = st.columns((100,0.1))
 
-            pred_df = pred_df.merge(sent_df,left_index=True, right_on='index')
-
-            sentiments_pred = apply_hg_model(pred_df['text_to_pred'].to_list(),API_URL_SENTIMENT)
-
-            pred_df = pred_df.reset_index(drop=True).join(
-                pd.concat([pd.DataFrame(i).sort_values('score', ascending=False).head(1) for i in sentiments_pred],
-                          ignore_index=True))
-            pred_df.head(3)
-
-            st.write(pred_df.head(5))
-            st.write(pred_df)
-
-            generate_sentiment_piehart(pred_df)
-
-
-    # st.write(filtered_df)
+        with sent_example_col:
+            for _, row in pred_df[['message', 'label','username','timestamp','score']].iterrows():
+                if row.label in colors_dict.keys():
+                    st.write(f'{row.username} ({row.timestamp}):')
+                    annot = ((i+' ', row.label,colors_dict.get(row.label),'black')\
+                                 if term.lower() in i.lower() else i+' ' for i in row.message.split())
+                    annotated_text(*annot)
+                    st.write('*Confidence Score: %s*' % human_format(row.score))
+                    st.divider()
 
 
 def main():
@@ -260,7 +278,7 @@ def main():
 
         with sentiment_tab:
             get_sentiment_widget(filtered_df,language)
-            st.write('Coming Soon...')
+            # st.write('Coming Soon...')
 
         with sum_tab:
             get_summarizer_df(filtered_df, language)

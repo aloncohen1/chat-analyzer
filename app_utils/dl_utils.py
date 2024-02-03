@@ -48,10 +48,11 @@ def get_conv_df(df, min_users=2, min_messages=4, min_length=8):
     conv_df['month'] = pd.to_datetime(conv_df['date']).dt.to_period('M')
     return conv_df
 
-
+st.cache_data(show_spinner=False)
 def query_hg(payload, model_api_url):
     data = json.dumps(payload)
     response = requests.request("POST", model_api_url, headers=headers, data=data)
+    print('apply_hg_model - request sent')
     return json.loads(response.content.decode("utf-8"))
 
 st.cache_data(show_spinner=False)
@@ -68,7 +69,7 @@ def run_trans(text_list, dest='en'):
 
     return results_list
 
-
+st.cache_data(show_spinner=False)
 def apply_hg_model(text_list, model_api_url, retries=5, sleep_sec=7):
 
     pred_text = query_hg({'inputs': text_list, 'wait_for_model': True}, model_api_url)

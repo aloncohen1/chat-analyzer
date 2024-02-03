@@ -16,9 +16,25 @@ import nltk.langnames as lgn
 from nltk.corpus import stopwords
 import gensim
 import re
+import time
 
 from sklearn.preprocessing import normalize
 
+def stream_data(text,latncy=0.04):
+    for word in text.split():
+        yield word + " "
+        time.sleep(latncy)
+
+
+def human_format(num, pct=True):
+    if pct:
+        return "{0:.0f}%".format(num * 100)
+    else:
+        magnitude = 0
+        while abs(num) >= 1000:
+            magnitude += 1
+            num = round(num / 1000.0, 0)
+        return '{:.{}f}{}'.format(num, 0, ['', 'K', 'M', 'G', 'T', 'P'][magnitude])
 
 def get_users_emoji_df(df, method='top_freq'):
     if method=='top_freq':

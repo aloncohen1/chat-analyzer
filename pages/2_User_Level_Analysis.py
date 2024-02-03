@@ -6,19 +6,9 @@ from app_utils.general_utils import refer_to_load_data_section, set_background, 
 from streamlit_extras.buy_me_a_coffee import button
 from PIL import Image
 import emoji
-from app_utils.text_utils import get_top_emojis
+from app_utils.text_utils import get_top_emojis, human_format
 
 USER_IMAGE = Image.open("add_ons/styles/logos/user_logo.jpg")
-
-def human_format(num, pct=True):
-    if pct:
-        return "{0:.0f}%".format(num * 100)
-    else:
-        magnitude = 0
-        while abs(num) >= 1000:
-            magnitude += 1
-            num = round(num / 1000.0, 0)
-        return '{:.{}f}{}'.format(num, 0, ['', 'K', 'M', 'G', 'T', 'P'][magnitude])
 
 
 def add_metric_black_b():

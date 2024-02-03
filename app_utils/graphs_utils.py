@@ -261,29 +261,33 @@ def user_message_responses_heatmap(df, language='en', n_users=10):
     return fig
 
 
-def generate_sentiment_piehart(df):
-    region_select = alt.selection_single(fields=["label"], empty="all")
-    region_pie = (
-        (
-            alt.Chart(df)
-            .mark_arc(innerRadius=50)
-            .encode(
-                theta=alt.Theta(
-                    "transaction_amount",
-                    type="quantitative",
-                    aggregate="sum",
-                    title="Sum of Transactions",
-                ),
-                color=alt.Color(
-                    field="region",
-                    type="nominal",
-                    title="Region",
-                ),
-                opacity=alt.condition(region_select, alt.value(1), alt.value(0.25)),
-            )
-        )
-        .add_selection(region_select)
-        .properties(title="Region Sales")
-    )
+def generate_sentiment_piehart(df,colors_mapping):
 
-    return region_pie
+    agg_df = df["label"].value_counts(normalize=True).reset_index()
+
+    agg_df['percent'] = agg_df['label'].apply(lambda x: "{0:.1f}%".format(x * 100))
+
+    fig = px.pie(agg_df, values="label", names='index',color='index', hole=0.5,
+                 hover_data="index",color_discrete_map=colors_mapping)
+
+    fig.update_traces(title_text='Overall Sentiments')
+    fig.update_traces(showlegend=False, textposition='inside', textinfo='percent+label')
+    fig.update_traces(hovertemplate="Label: %{label}<br>Value : %{percent}")
+    fig.update_layout(paper_bgcolor="rgba(18,32,43)", plot_bgcolor="rgba(18,32,43)")
+
+    return fig
+
+def generate_sentiment_bars(df, colors_mapping):
+
+    agg_df = df.groupby(['week', 'label'], as_index=False).agg(n_messages=('sent','count'))
+
+    agg_df['messages_pct'] = agg_df['n_messages'] / agg_df['n_messages'].sum()
+    agg_df['messages_pct_text'] = agg_df['messages_pct'].apply(lambda x: "{0:.1f}%".format(x * 100))
+
+    fig = px.bar(agg_df, x="week", y="messages_pct", hover_data='messages_pct_text',custom_data=['messages_pct_text'],
+                 color="label", title="Sentiment Over Time", color_discrete_map=colors_mapping)
+
+    fig.update_traces(hovertemplate="Label: %{label}<br>Value : %{customdata[0]}")
+    fig.update_layout(yaxis_tickformat='.0%')
+
+    return fig
