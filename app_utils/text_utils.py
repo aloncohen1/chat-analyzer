@@ -8,8 +8,6 @@ from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer, T
 
 import pandas as pd
 import nltk
-from nltk.stem.porter import PorterStemmer
-from nltk import WordNetLemmatizer
 
 if not st.session_state.get('bcp47_downloaded'):
     nltk.download('bcp47')
@@ -20,6 +18,8 @@ if not st.session_state.get('stopwords_downloaded'):
     st.session_state['stopwords_downloaded'] = True
 
 
+from nltk.stem.porter import PorterStemmer
+from nltk import WordNetLemmatizer
 import nltk.langnames as lgn
 from nltk.corpus import stopwords
 import gensim
