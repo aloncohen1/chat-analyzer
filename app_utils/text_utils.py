@@ -10,8 +10,16 @@ import pandas as pd
 import nltk
 from nltk.stem.porter import PorterStemmer
 from nltk import WordNetLemmatizer
-nltk.download('bcp47')
-nltk.download('stopwords')
+
+if not st.session_state.get('bcp47_downloaded'):
+    nltk.download('bcp47')
+    st.session_state['bcp47_downloaded'] = True
+
+if not st.session_state.get('stopwords_downloaded'):
+    nltk.download('stopwords')
+    st.session_state['stopwords_downloaded'] = True
+
+
 import nltk.langnames as lgn
 from nltk.corpus import stopwords
 import gensim
