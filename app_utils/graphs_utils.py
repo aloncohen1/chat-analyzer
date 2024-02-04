@@ -267,8 +267,8 @@ def generate_sentiment_piehart(df,colors_mapping):
 
     agg_df['percent'] = agg_df['label'].apply(lambda x: "{0:.1f}%".format(x * 100))
 
-    fig = px.pie(agg_df, values="label", names='index',color='index', hole=0.5,
-                 hover_data="index",color_discrete_map=colors_mapping)
+    fig = px.pie(agg_df, values="label", names='index', color='index', hole=0.5,
+                 hover_data=["index", "percent"], color_discrete_map=colors_mapping)
 
     fig.update_traces(title_text='Overall Sentiments')
     fig.update_traces(showlegend=False, textposition='inside', textinfo='percent+label')
