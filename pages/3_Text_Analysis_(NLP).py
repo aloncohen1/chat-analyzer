@@ -216,9 +216,12 @@ def calc_sentimnets(filtered_df,term, chat_lang, max_words, max_messages, sample
                       ignore_index=True))
         return pred_df
 
+    else:
+        st.title(f'"{term}" not seem to appear in Chat')
+
 
 @st.spinner('Caculating Sentiment....')
-def get_sentiment_widget(filtered_df, language, max_words=30, max_messages=30, sample_size=0.2):
+def get_sentiment_widget(filtered_df, language, max_words=30, max_messages=300, sample_size=0.2):
 
     if not st.session_state.get('lang'):
         detect_lang(filtered_df)
