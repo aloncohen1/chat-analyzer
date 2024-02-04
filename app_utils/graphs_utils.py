@@ -284,7 +284,7 @@ def generate_sentiment_bars(df, colors_mapping):
     agg_df['messages_pct'] = agg_df['n_messages'] / agg_df['n_messages'].sum()
     agg_df['messages_pct_text'] = agg_df['messages_pct'].apply(lambda x: "{0:.1f}%".format(x * 100))
 
-    fig = px.bar(agg_df, x="week", y="messages_pct", hover_data='messages_pct_text',custom_data=['messages_pct_text'],
+    fig = px.bar(agg_df, x="week", y="messages_pct", hover_data=['messages_pct_text'],custom_data=['messages_pct_text'],
                  color="label", title="Sentiment Over Time", color_discrete_map=colors_mapping)
 
     fig.update_traces(hovertemplate="Label: %{label}<br>Value : %{customdata[0]}")
