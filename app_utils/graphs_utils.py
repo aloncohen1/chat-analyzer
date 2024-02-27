@@ -88,6 +88,15 @@ def generate_piechart(df, language='en', top_n=10):
     else:
         return go.Figure()
 
+
+def fix_empty_activity_df(agg_df,df,granularity,unit,unit_dict,unit_lan_dict,language,granularity_lan_dict):
+
+    if agg_df.empty:
+        agg_df = df.groupby(granularity).agg({'username': unit_dict[unit]}).reset_index() \
+            .rename(columns={'username': f'# {unit_lan_dict[language][unit]}',
+                             granularity: granularity_lan_dict[language][granularity].capitalize()})
+    return agg_df
+
 def generate_activity_overtime(df, min_date, max_date, language='en', unit='Messages', granularity='month'):
 
     unit_dict = {'Messages': 'count', 'Users': 'nunique'}
@@ -99,8 +108,10 @@ def generate_activity_overtime(df, min_date, max_date, language='en', unit='Mess
     plot_title = {'en': 'Overall Chat Activity Over Time', 'he': "טרנד פעילות כללית על פני זמן"}
 
     agg_df = df.groupby(granularity).agg({'username': unit_dict[unit]}) \
-        .reindex(pd.date_range(min_date, max_date, freq=FREQ_DICT[granularity]), fill_value=0).reset_index() \
+        .reindex(pd.date_range(min_date, max_date, freq=FREQ_DICT[granularity], closed='right'), fill_value=0).reset_index() \
         .rename(columns={'username': f'# {unit_lan_dict[language][unit]}', 'index': granularity_lan_dict[language][granularity].capitalize()})
+
+    agg_df = fix_empty_activity_df(agg_df, df, granularity, unit, unit_dict, unit_lan_dict, language, granularity_lan_dict)
 
     fig = px.line(agg_df, x=granularity_lan_dict[language][granularity].capitalize(),
                   y=f'# {unit_lan_dict[language][unit]}')
