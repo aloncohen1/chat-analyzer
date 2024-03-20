@@ -93,15 +93,16 @@ def refer_to_load_data_section():
 
 
 def set_background():
-    page_bg_img = '''
-    <style>
-    .stApp {
-    background-image: url("https://w0.peakpx.com/wallpaper/580/650/HD-wallpaper-whatsapp-bg-dark-background.jpg");
-    background-size: contain;
-    }
-    </style>
-    '''
-    st.markdown(page_bg_img, unsafe_allow_html=True)
+    # page_bg_img = '''
+    # <style>
+    # .stApp {
+    # background-image: url("https://w0.peakpx.com/wallpaper/580/650/HD-wallpaper-whatsapp-bg-dark-background.jpg");
+    # background-size: contain;
+    # }
+    # </style>
+    # '''
+    # st.markdown(page_bg_img, unsafe_allow_html=True)
+    pass
 
 
 def add_conversation_id(df,threshold_quantile=0.9):
@@ -151,8 +152,17 @@ def add_filters(add_side_filters=True):
         if min_date == max_date:
             max_date = max_date + timedelta(days=1)
 
+        if not st.session_state.get('time_filter'):
+            st.session_state['time_filter'] = min_date, max_date
+            current_min_date, current_max_date = min_date, max_date
+        else:
+            current_min_date, current_max_date = st.session_state['time_filter']
+
         st.sidebar.write('')
-        time_filter = st.sidebar.slider("Time Period", min_date, max_date, (min_date, max_date))
+        time_filter = st.sidebar.slider("Time Period", current_min_date, current_max_date, (min_date, max_date))
+        st.session_state['time_filter'] = time_filter
+
+        # st.write(st.session_state['time_filter'])
 
         st.sidebar.write('')
 
