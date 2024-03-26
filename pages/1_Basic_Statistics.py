@@ -23,7 +23,7 @@ def main():
 
         filtered_df, min_date, max_date, language = add_filters()
 
-        # st.markdown(local_css("add_ons/styles/metrics.css"), unsafe_allow_html=True)
+        st.markdown(local_css("add_ons/styles/metrics.css"), unsafe_allow_html=True)
 
         if st.session_state.get('file_name'):
             st.header(st.session_state.get('file_name'))

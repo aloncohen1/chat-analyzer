@@ -87,7 +87,7 @@ def get_sum_text(text_list):
 
     trans_text = run_trans(text_list)
 
-    sum_texts = apply_hg_model([i['translation'] for i in trans_text],API_URL_SAMSUM)
+    sum_texts = apply_hg_model([i['translation'] for i in trans_text], API_URL_SAMSUM)
 
     top_src = pd.DataFrame(trans_text)['src'].value_counts().index[0]
     if top_src != 'en':

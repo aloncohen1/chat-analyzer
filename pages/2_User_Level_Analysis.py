@@ -153,7 +153,7 @@ def main():
                 with col:
                     assign_metrics(col,totals_df, USER_IMAGE, user_info, language=language,add_seperator=False,pct=pct)
 
-        # add_metric_black_b()
+        add_metric_black_b()
 
 
 # Run the app
