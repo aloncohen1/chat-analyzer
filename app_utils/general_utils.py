@@ -158,6 +158,10 @@ def add_filters(add_side_filters=True):
             current_min_date, current_max_date = st.session_state['time_filter']
 
         st.sidebar.write('')
+
+        data_year = st.sidebar.multiselect("Year", ["All"] + list(st.session_state['data']['year'].astype(int).unique()),
+                                           default='All')
+
         time_filter = st.sidebar.slider("Time Period", current_min_date, current_max_date, (min_date, max_date))
         st.session_state['time_filter'] = time_filter
 
@@ -165,12 +169,21 @@ def add_filters(add_side_filters=True):
 
         st.sidebar.write('')
 
-        users_filter = st.sidebar.multiselect("Users", ["All"] + list(st.session_state['data']['username'].unique()),
+
+        users_filter = st.sidebar.multiselect("User", ["All"] + list(st.session_state['data']['username'].unique()),
                                               default='All')
+
         if "All" in users_filter or not users_filter:
             filtered_df = st.session_state['data']
         else:
             filtered_df = st.session_state['data'][st.session_state['data']['username'].isin(users_filter)]
+
+        if "All" in data_year or not data_year:
+            pass
+        else:
+            filtered_df = filtered_df[filtered_df['year'].astype(int).isin(data_year)]
+
+
 
         language = app_language()
 
