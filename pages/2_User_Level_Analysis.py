@@ -19,7 +19,7 @@ def add_metric_black_b():
              </style>
              '''
 
-    st.markdown(css_body_container, unsafe_allow_html=True)
+    # st.markdown(css_body_container, unsafe_allow_html=True)
 
 
 def center_photo():
