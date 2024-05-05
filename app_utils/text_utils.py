@@ -75,6 +75,9 @@ def get_top_emojis(df, method='Most Frequent'):
 
         top_fre_emoji = pd.DataFrame(bow_df.idxmax(axis=1)).reset_index() \
             .rename(columns={0: 'top_freq_emoji'})
+
+        return top_fre_emoji
+
     else:
 
         ctfidf = CTFIDFVectorizer().fit_transform(X, n_samples=len(emoji_df)).toarray()
@@ -83,8 +86,6 @@ def get_top_emojis(df, method='Most Frequent'):
 
         return pd.DataFrame(words_per_class_min).T.reset_index()\
             .rename(columns={0: 'top_freq_emoji','index':'username'})
-
-    return top_fre_emoji
 
 
 def detect_lang(df, n_sample=30, min_text_length=10):
