@@ -1,3 +1,4 @@
+import pandas as pd
 import streamlit as st
 import streamlit_analytics
 import numpy as np
@@ -9,6 +10,8 @@ import emoji
 from app_utils.text_utils import get_top_emojis, human_format
 
 USER_IMAGE = Image.open("add_ons/styles/logos/user_logo.jpg")
+
+import streamlit.components.v1 as components
 
 
 def add_metric_black_b():
@@ -96,10 +99,61 @@ def assign_metrics(col, totals_df, image, user_info, language, add_seperator=Tru
     else:
         col2.metric(emoji_lang_dict[language], 'No Emoji')
 
-    # bot = st.button('generate report', key=user_info.username)
+    bot = st.button('generate report', key=user_info.username)
     if add_seperator:
         st.divider()
 
+    return bot
+
+
+def gen_landing_page(filtered_df, language, min_date, max_date):
+
+    header_text = {'en': 'User Level Analysis', 'he': 'ניתוח משתמשים'}
+    st.subheader(header_text[language])
+    top_col, _ = st.columns((1000, 0.1))
+    with top_col:
+        pct_lang_dict = {'en': "Show Percentages", "he": 'הצג אחוזים'}
+
+        method_lang_dict = {'en': {"Most Associated": "Most Associated",
+                                   "Most Frequent": "Most Frequent"},
+                            "he": {"המזוהה ביותר": "Most Associated",
+                                   "התדיר ביותר": "Most Frequent"}}
+
+        pct = st.checkbox(pct_lang_dict[language])
+        emohi_picker_lang_dict = {'en': "Top Emoji Method", 'he': "איזה אימוג'י"}
+        emoji_method = st.radio(emohi_picker_lang_dict[language], list(method_lang_dict[language].keys()))
+
+        emoji_method = method_lang_dict[language][emoji_method]
+
+    top_n_users = min(filtered_df['username'].nunique(), 8)
+
+    metrics_df, totals_df = get_users_metrics(filtered_df, top_n_users, emoji_method, min_date, max_date)
+
+    row_a_n_users, row_b_n_users = calc_n_user_per_row(top_n_users)
+
+    row_a = st.columns(np.array(int(row_a_n_users) * [10]))
+
+    bot_list = []
+
+    for col, user_info in zip(row_a, metrics_df[:int(row_a_n_users)].to_records()):
+        with col:
+            bot = assign_metrics(col, totals_df, USER_IMAGE, user_info, language=language, pct=pct)
+            bot_list.append({'username': user_info.username, 'gen_report': bot})
+
+    if row_b_n_users != 0:
+
+        for col, user_info in zip(row_a, metrics_df[int(row_b_n_users):].to_records()):
+            with col:
+                bot = assign_metrics(col, totals_df, USER_IMAGE, user_info, language=language, add_seperator=False,
+                                     pct=pct)
+                bot_list.append({'username': user_info.username, 'gen_report': bot})
+
+    add_metric_black_b()
+
+    return bot_list
+
+def gen_user_report():
+    pass
 
 def main():
 
@@ -117,43 +171,27 @@ def main():
         if st.session_state.get('file_name'):
             st.header(st.session_state.get('file_name'))
 
-        header_text = {'en': 'User Level Analysis', 'he': 'ניתוח משתמשים'}
-        st.subheader(header_text[language])
-        top_col, _ = st.columns((1000, 0.1))
-        with top_col:
-            pct_lang_dict = {'en': "Show Percentages", "he":'הצג אחוזים'}
+        user_level_landing_page = st.empty()
+        with user_level_landing_page.container():
+            bot_list = gen_landing_page(filtered_df, language, min_date, max_date)
+            # st.write(bot_list)
 
-            method_lang_dict = {'en': {"Most Associated":"Most Associated",
-                                        "Most Frequent":"Most Frequent"},
-                                 "he": {"המזוהה ביותר": "Most Associated",
-                                        "התדיר ביותר": "Most Frequent"}}
 
-            pct = st.checkbox(pct_lang_dict[language])
-            emohi_picker_lang_dict = {'en': "Top Emoji Method", 'he':"איזה אימוג'י"}
-            emoji_method = st.radio(emohi_picker_lang_dict[language], list(method_lang_dict[language].keys()))
 
-            emoji_method = method_lang_dict[language][emoji_method]
 
-        top_n_users = min(filtered_df['username'].nunique(), 8)
 
-        metrics_df, totals_df = get_users_metrics(filtered_df, top_n_users, emoji_method, min_date, max_date)
+            # st.write(pd.DataFrame(bot_list))
+            #
+            # my_bot = st.button('test')
+        # st.write(bot_list)
 
-        row_a_n_users, row_b_n_users = calc_n_user_per_row(top_n_users)
+        if any([i['gen_report'] for i in bot_list]):
+            user_level_landing_page.empty()
+            st.write([i for i in bot_list if i['gen_report'] is True])
+            my_bot = st.button('back to user page')
+            if my_bot:
+                main()
 
-        row_a = st.columns(np.array(int(row_a_n_users) * [10]))
-
-        for col, user_info in zip(row_a, metrics_df[:int(row_a_n_users)].to_records()):
-
-            with col:
-                assign_metrics(col, totals_df, USER_IMAGE, user_info, language=language,pct=pct)
-
-        if row_b_n_users != 0:
-
-            for col, user_info in zip(row_a, metrics_df[int(row_b_n_users):].to_records()):
-                with col:
-                    assign_metrics(col,totals_df, USER_IMAGE, user_info, language=language,add_seperator=False,pct=pct)
-
-        add_metric_black_b()
 
 
 # Run the app
