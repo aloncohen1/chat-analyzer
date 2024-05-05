@@ -25,7 +25,7 @@ See [here](https://huggingface.co/docs/hub/en/security-tokens) how to create you
 
 Once your `secret.toml` is ready, run:
 ```
-!git clone https://github.com/aloncohen1/chat-analyzer.git
-!pip install -r /<local_path>/chat-analyzer/requirements.txt
-!streamlit run /content/chat-analyzer/Home.py
+git clone https://github.com/aloncohen1/chat-analyzer.git
+pip install -r /<local_path>/chat-analyzer/requirements.txt
+streamlit run /content/chat-analyzer/Home.py
 ```
