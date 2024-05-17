@@ -5,7 +5,8 @@ import re
 from streamlit_extras.buy_me_a_coffee import button
 from annotated_text import annotated_text
 
-from app_utils.dl_utils import get_conv_df, get_sum_text, wake_up_models, run_trans, apply_hg_model, API_URL_SENTIMENT
+from app_utils.dl_utils import get_conv_df, get_sum_text, wake_up_models, run_trans, apply_hg_model, API_URL_SENTIMENT, \
+    get_sum_text_llm
 from app_utils.general_utils import refer_to_load_data_section, set_background, add_logo, add_filters, local_css, \
     linkedin_link, form_link, buy_me_a_coffee_link
 
@@ -110,8 +111,9 @@ def get_summarizer_df(filtered_df, language):
                         for conv_id, sum_text_i in zip(conv_ids, sum_text):
                             st.markdown(f'<div style="text-align: right;"><b><u>{conv_id}</b></u></div>',
                                         unsafe_allow_html=True)
-                            st.write_stream(stream_data(sum_text_i))
-                            st.write("------")
+                            with st.chat_message("assistant"):
+                                st.write_stream(stream_data(sum_text_i))
+                                st.write("------")
                     except Exception as e:
                         st.write("Somthing went wrong, please try again in a few seconds")
                         st.write(e)
@@ -182,7 +184,8 @@ def get_trends_explorer_widgets(filtered_df, min_date, max_date, language):
     return filtered_df
 
 @st.cache_data(show_spinner=False)
-def calc_sentimnets(filtered_df,term, chat_lang, max_words, max_messages, sample_size):
+@st.spinner(text='Caculating Sentiment....')
+def calc_sentiments(filtered_df, term, chat_lang, max_words, max_messages, sample_size):
     pattern = f'[^a-zA-Zא-ת]{term.lower()}[^a-zA-Zא-ת]'
     pred_df = filtered_df[(filtered_df['message'].str.lower().str.contains(term.lower())) &
                           (filtered_df['message'].str.lower().str.contains(pattern)) &
@@ -217,10 +220,10 @@ def calc_sentimnets(filtered_df,term, chat_lang, max_words, max_messages, sample
         return pred_df
 
     else:
-        st.title(f'"{term}" not seem to appear in Chat')
+        st.subheader(f'"{term}" not seem to appear in your chat')
+        return pd.DataFrame()
 
-
-@st.spinner('Caculating Sentiment....')
+@st.spinner('Loading...')
 def get_sentiment_widget(filtered_df, language, max_words=30, max_messages=300, sample_size=0.2):
 
     if not st.session_state.get('lang'):
@@ -239,25 +242,26 @@ def get_sentiment_widget(filtered_df, language, max_words=30, max_messages=300, 
         if not term:
             pass
         else:
-            pred_df = calc_sentimnets(filtered_df, term, chat_lang, max_words, max_messages, sample_size)
+            pred_df = calc_sentiments(filtered_df, term, chat_lang, max_words, max_messages, sample_size)
 
-            col0, col1 = st.columns((1,2))
-            # colors_text_dict = {'Negative':'#FEEDEC','Neutral':'#FFF8E0','Positive':'#E4F8ED'}
-            colors_dict = {'Negative':'#ff5a5a','Neutral':'#ffb119','Positive':'#27b966'}
-            col0.plotly_chart(generate_sentiment_piehart(pred_df,colors_dict),use_container_width=True)
-            col1.plotly_chart(generate_sentiment_bars(pred_df,colors_dict),use_container_width=True)
+            if not pred_df.empty:
+                col0, col1 = st.columns((1, 2))
+                # colors_text_dict = {'Negative':'#FEEDEC','Neutral':'#FFF8E0','Positive':'#E4F8ED'}
+                colors_dict = {'Negative':'#ff5a5a','Neutral':'#ffb119','Positive':'#27b966'}
+                col0.plotly_chart(generate_sentiment_piehart(pred_df,colors_dict),use_container_width=True)
+                col1.plotly_chart(generate_sentiment_bars(pred_df,colors_dict),use_container_width=True)
 
-            sent_example_col,_ = st.columns((100,0.1))
+                sent_example_col,_ = st.columns((100,0.1))
 
-            with sent_example_col:
-                for _, row in pred_df[['message', 'label','username','timestamp','score']].iterrows():
-                    if row.label in colors_dict.keys():
-                        st.write(f'{row.username} ({row.timestamp}):')
-                        annot = ((i+' ', row.label,colors_dict.get(row.label),'black')\
-                                     if term.lower() in i.lower() else i+' ' for i in row.message.split())
-                        annotated_text(*annot)
-                        st.write('*Confidence Score: %s*' % human_format(row.score))
-                        st.divider()
+                with sent_example_col:
+                    for _, row in pred_df[['message', 'label','username','timestamp','score']].iterrows():
+                        if row.label in colors_dict.keys():
+                            st.write(f'{row.username} ({row.timestamp}):')
+                            annot = ((i+' ', row.label,colors_dict.get(row.label),'black')\
+                                         if term.lower() in i.lower() else i+' ' for i in row.message.split())
+                            annotated_text(*annot)
+                            st.write('*Confidence Score: %s*' % human_format(row.score))
+                            st.divider()
 
 
 def main():
