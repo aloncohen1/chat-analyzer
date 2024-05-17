@@ -111,12 +111,11 @@ def get_lang_stop_words(df):
     if top_lng_name:
         top_lng_name = top_lng_name.lower()
         if top_lng_name in stopwords.fileids():
-            stop_words = stopwords.words(top_lng_name)
+            stop_words = stopwords.words(top_lng_name) + stopwords.words('english')
         else:
             stop_words = stopwords.words('english')
     else:
         stop_words = stopwords.words('english')
-
     return stop_words
 
 
@@ -128,9 +127,8 @@ def get_users_top_worlds(df, n_users=10, top_words=5):
     stop_words = get_lang_stop_words(df)
 
     if lang == "hebrew":
-        stop_words +=[f'{i}ו' for i in stop_words]
-        stop_words += [f'{i}מ' for i in stop_words]
-        stop_words += [f'{i}ה' for i in stop_words]
+        for item in ['ה','מ','כש','ו']:
+            stop_words +=[f'{i}{item}' for i in stop_words]
 
     df['clean_text'] = df['message'].apply(lambda x: clean_text(x, lang))
 
@@ -203,27 +201,35 @@ def run_ctfidf(users_text, stop_words, top_words=5):
 
     return pd.DataFrame(words_per_class_min)
 
+@st.cache_data()
+def get_top_worlds(df):
 
+    chat_stop = ["media omitted", "option", 'this message was deleted', 'this message was deleted']
 
-# def run_emoji_ctfidf(users_text, stop_words, top_words=5):
-#
-#
-#
-#     count_vectorizer = CountVectorizer(stop_words=stop_words,
-#                                        ngram_range=(1, 2),
-#                                        min_df=max(1, n_users) if n_users<=3 else 2).fit(users_text.clean_text)
-#     count = count_vectorizer.transform(users_text.clean_text)
-#     words = count_vectorizer.get_feature_names_out()
-#
-#     nnz_inds = count.nonzero()
-#     keep = np.where(count.data > 2)[0]
-#     n_keep = len(keep)
-#     count = csr_matrix((np.ones(n_keep), (nnz_inds[0][keep], nnz_inds[1][keep])), shape=count.shape)
-#
-#     # Extract top 10 words per class
-#     ctfidf = CTFIDFVectorizer().fit_transform(count, n_samples=len(users_text)).toarray()
-#     words_per_class_min = {user_name: [words[index] for index in ctfidf[label].argsort()[-top_words:]]
-#                            for label, user_name in zip(users_text.username.index, users_text.username)}
-#
-#     return pd.DataFrame(words_per_class_min)
+    if not st.session_state.get('lang'):
+        detect_lang(df)
+    lang = lgn.langname(st.session_state['lang'])
+    stop_words = get_lang_stop_words(df) + chat_stop
+
+    if lang == "hebrew":
+        for item in ['ה','מ','כש','ו']:
+            stop_words += [f'{i}{item}' for i in stop_words]
+
+    text_df = df[df['clean_text'].apply(len) > 0].groupby('username', as_index=False).agg({'clean_text': '\n'.join})
+
+    vectorizer = CountVectorizer(min_df=4, ngram_range=(1, 3), stop_words=stop_words)
+    X = vectorizer.fit_transform(text_df['clean_text'])
+    words_dict = vectorizer.get_feature_names_out()
+
+    ctfidf = CTFIDFVectorizer().fit_transform(X, n_samples=len(text_df)).toarray()
+
+    results_df = []
+    for user, user_ctfidf in zip(text_df.username, ctfidf):
+        temp_df = pd.DataFrame(data=zip(words_dict, user_ctfidf), columns=['term', 'rank'])\
+            .sort_values('rank', ascending=False)[0:30]
+        temp_df['username'] = user
+        results_df.append(temp_df)
+
+    results_df = pd.concat(results_df, ignore_index=True)
+    return results_df
 
