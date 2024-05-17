@@ -1,9 +1,10 @@
 import pandas as pd
+import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
-import altair as alt
 from whatstk import WhatsAppChat
 from whatstk.graph import FigureBuilder
+
 
 DAYS_ORDER_EN = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 DAYS_ORDER_HE = ["Sunday","Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
@@ -302,3 +303,106 @@ def generate_sentiment_bars(df, colors_mapping):
     fig.update_layout(yaxis_tickformat='.0%')
 
     return fig
+
+
+
+# def plotly_wordcloud(text_dict):
+#     # Generate word cloud
+#     wc = WordCloud(width=800, height=400, max_words=200, background_color=None, mode='RGBA')\
+#         .generate_from_frequencies(text_dict)
+#
+#     word_list = []
+#     freq_list = []
+#     fontsize_list = []
+#     position_list = []
+#     orientation_list = []
+#     color_list = []
+#
+#     for (word, freq), fontsize, position, orientation, color in wc.layout_:
+#         word_list.append(word)
+#         freq_list.append(freq)
+#         fontsize_list.append(fontsize)
+#         position_list.append(position)
+#         orientation_list.append(orientation)
+#         color_list.append(color)
+#
+#     # get the positions
+#     x = []
+#     y = []
+#     for i in position_list:
+#         x.append(i[0])
+#         y.append(i[1])
+#
+#     # Normalize the font sizes to fit into the plotly figure
+#     new_freq_list = []
+#     for i in fontsize_list:
+#         new_freq_list.append(i * 0.6)  # adjust the scaling factor if necessary
+#
+#     trace = go.Scatter(
+#         x=x,
+#         y=y,
+#         textfont=dict(size=new_freq_list, color=color_list),
+#         hoverinfo='text',
+#         hovertext=['{0} {1}'.format(w, f) for w, f in zip(word_list, freq_list)],
+#         mode='text',
+#         text=word_list
+#     )
+#
+#     layout = go.Layout(
+#         xaxis=dict(showgrid=False, showticklabels=False, zeroline=False),
+#         yaxis=dict(showgrid=False, showticklabels=False, zeroline=False),
+#         margin=dict(l=0, r=0, t=0, b=0),
+#         height=400,
+#         width=800
+#     )
+#
+#     fig = go.Figure(data=[trace], layout=layout)
+#
+#     return fig
+
+
+
+def generate_random_positions(num_words, x_range=(0, 100), y_range=(0, 100)):
+    x_positions = np.random.uniform(x_range[0], x_range[1], num_words)
+    y_positions = np.random.uniform(y_range[0], y_range[1], num_words)
+    return x_positions, y_positions
+
+def plotly_wordcloud(word_scores):
+    words = list(word_scores.keys())
+    scores = np.array(list(word_scores.values()))
+
+    # Normalize scores to determine font size
+    min_font_size = 10
+    max_font_size = 50
+    normalized_scores = (scores - scores.min()) / (scores.max() - scores.min())
+    font_sizes = min_font_size + normalized_scores * (max_font_size - min_font_size)
+
+    # Generate random positions
+    num_words = len(words)
+    x_positions, y_positions = generate_random_positions(num_words)
+
+    # Create a scatter plot with text
+    scatter = go.Scatter(
+        x=x_positions,
+        y=y_positions,
+        mode='text',
+        text=words,
+        textfont=dict(
+            size=font_sizes,
+            color='#24d366'
+        ),
+        hoverinfo='text'
+    )
+
+    layout = go.Layout(
+        xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+        yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+        showlegend=False,
+        margin=dict(l=0, r=0, t=0, b=0),
+        plot_bgcolor='rgba(18,32,43)',  # Transparent plot background
+        paper_bgcolor='rgba(18,32,43)'  # Transparent paper background
+    )
+
+    fig = go.Figure(data=[scatter], layout=layout)
+    return fig
+
