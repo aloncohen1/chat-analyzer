@@ -5,10 +5,12 @@ from time import sleep
 import pandas as pd
 from googletrans import Translator
 import streamlit as st
+from huggingface_hub import InferenceClient
 
 API_TOKEN = st.secrets["hf_api_token"]
 API_URL_SAMSUM = "https://api-inference.huggingface.co/models/philschmid/bart-large-cnn-samsum"
 API_URL_SENTIMENT = "https://api-inference.huggingface.co/models/yangheng/deberta-v3-base-absa-v1.1"
+API_URL_PHI_3_MINI_LLM = "https://api-inference.huggingface.co/models/microsoft/Phi-3-mini-4k-instruct"
 
 headers = {"Authorization": f"Bearer {API_TOKEN}"}
 
@@ -100,3 +102,46 @@ def get_sum_text(text_list):
     return final_text
 
 
+@st.cache_data(show_spinner=False)
+def get_sum_text_llm(text_list):
+
+    client = InferenceClient(API_URL_PHI_3_MINI_LLM, token=API_TOKEN)
+    trans_texts = run_trans(text_list)
+
+    gen_kwargs = dict(
+        max_new_tokens=512,
+        top_k=30,
+        top_p=0.9,
+        temperature=0.2,
+        repetition_penalty=1.02,
+        stop_sequences=["\nUser:", "<|endoftext|>", "</s>"],
+    )
+
+    final_text = []
+    for trans_text in trans_texts:
+        # Please produce a short summarization of the following whataspp conversation
+        prompt = f"""<|user|>Summarize the conversation below, delimited by triple backticks, in at most 50 words.
+        Do not add notes 
+        Conversation: ```{trans_text['translation']}```<|end|><|assistant|>"""
+
+        stream = client.text_generation(prompt, stream=True, details=True, **gen_kwargs)
+        stream_output = []
+        for r in stream:
+            # skip special tokens
+            if r.token.special:
+                continue
+            # stop if we encounter a stop sequence
+            if r.token.text in gen_kwargs["stop_sequences"]:
+                break
+            # yield the generated token
+            stream_output.append(r.token.text)
+
+        final_text.append(''.join(stream_output))
+
+    top_src = pd.DataFrame(trans_texts)['src'].value_counts().index[0]
+    if top_src != 'en':
+
+        back_trans = run_trans(final_text, dest=top_src)
+        final_text = [i['translation'] for i in back_trans]
+
+    return final_text
