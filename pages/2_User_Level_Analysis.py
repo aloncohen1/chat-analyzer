@@ -7,11 +7,14 @@ from app_utils.general_utils import refer_to_load_data_section, set_background, 
 from streamlit_extras.buy_me_a_coffee import button
 from PIL import Image
 import emoji
-from app_utils.text_utils import get_top_emojis, human_format
+
+from app_utils.graphs_utils import plotly_wordcloud
+from app_utils.text_utils import get_top_emojis, human_format, get_top_worlds
 
 USER_IMAGE = Image.open("add_ons/styles/logos/user_logo.jpg")
 
-import streamlit.components.v1 as components
+
+
 
 
 def add_metric_black_b():
@@ -61,10 +64,10 @@ def get_users_metrics(df, top_n,emoji_method, min_date, max_date):
                                 n_media=('is_media', 'sum'))
 
     totals_df = df.agg(n_days=('date', 'nunique'),
-                                n_messages=('username', 'count'),
-                                n_conversation=('conversation_id', 'nunique'),
-                                n_words=('text_length', 'sum'),
-                                n_media=('is_media', 'sum')).max(axis=1)
+                       n_messages=('username', 'count'),
+                       n_conversation=('conversation_id', 'nunique'),
+                       n_words=('text_length', 'sum'),
+                       n_media=('is_media', 'sum')).max(axis=1)
 
     top_emoji = get_top_emojis(st.session_state['data'][st.session_state['data']['date'].between(min_date, max_date)],
                                emoji_method)
@@ -75,7 +78,7 @@ def get_users_metrics(df, top_n,emoji_method, min_date, max_date):
     return agg_df, totals_df
 
 
-def assign_metrics(col, totals_df, image, user_info, language, add_seperator=True, pct=True):
+def assign_metrics(col, totals_df, image, user_info, language, add_seperator=True, pct=True,add_bot=True):
 
     sign = {'en': '%' if pct else 'N', 'he': '%' if pct else 'סה"כ'}
 
@@ -85,7 +88,8 @@ def assign_metrics(col, totals_df, image, user_info, language, add_seperator=Tru
     n_conv_lang_dict = {'en': f"{sign[language]} Conversation", 'he': f'{sign[language]} שיחות'}
     n_media_lang_dict = {'en': f"{sign[language]} Media", 'he': f'תמונת/סרטונים'}
     emoji_lang_dict = {'en': "Top Emoji", 'he': "אימוג'י"}
-
+    if not col:
+        col = st.columns((1, 0.001))
     col.image(image, caption=user_info.username, width=100)
     col1, col2 = st.columns((2, 2))
     col1.metric(n_mes_lang_dict[language], human_format(user_info.n_messages / (totals_df.n_messages if pct else 1), pct))
@@ -98,8 +102,7 @@ def assign_metrics(col, totals_df, image, user_info, language, add_seperator=Tru
         col2.metric(emoji_lang_dict[language], emoji.emojize(emoji.demojize(user_info.top_freq_emoji)))
     else:
         col2.metric(emoji_lang_dict[language], 'No Emoji')
-
-    bot = st.button('generate report', key=user_info.username)
+    bot = st.button('generate report', key=user_info.username) if add_bot else None
     if add_seperator:
         st.divider()
 
@@ -129,6 +132,8 @@ def gen_landing_page(filtered_df, language, min_date, max_date):
 
     metrics_df, totals_df = get_users_metrics(filtered_df, top_n_users, emoji_method, min_date, max_date)
 
+    # st.write(metrics_df)
+
     row_a_n_users, row_b_n_users = calc_n_user_per_row(top_n_users)
 
     row_a = st.columns(np.array(int(row_a_n_users) * [10]))
@@ -138,7 +143,7 @@ def gen_landing_page(filtered_df, language, min_date, max_date):
     for col, user_info in zip(row_a, metrics_df[:int(row_a_n_users)].to_records()):
         with col:
             bot = assign_metrics(col, totals_df, USER_IMAGE, user_info, language=language, pct=pct)
-            bot_list.append({'username': user_info.username, 'gen_report': bot})
+            bot_list.append({'username': user_info.username, 'gen_report': bot, "user_info":user_info})
 
     if row_b_n_users != 0:
 
@@ -146,13 +151,16 @@ def gen_landing_page(filtered_df, language, min_date, max_date):
             with col:
                 bot = assign_metrics(col, totals_df, USER_IMAGE, user_info, language=language, add_seperator=False,
                                      pct=pct)
-                bot_list.append({'username': user_info.username, 'gen_report': bot})
+                bot_list.append({'username': user_info.username, 'gen_report': bot, "user_info":user_info})
 
     add_metric_black_b()
 
-    return bot_list
+    return totals_df, bot_list
 
 def gen_user_report():
+    pass
+
+def get_user_terms_texts(df):
     pass
 
 def main():
@@ -171,11 +179,15 @@ def main():
         if st.session_state.get('file_name'):
             st.header(st.session_state.get('file_name'))
 
+        users_words_df = get_top_worlds(filtered_df)
+
         user_level_landing_page = st.empty()
         with user_level_landing_page.container():
-            bot_list = gen_landing_page(filtered_df, language, min_date, max_date)
-            # st.write(bot_list)
+            # st.write('naive')
+            # st.write(users_words_df)
 
+            totals_df, bot_list = gen_landing_page(filtered_df, language, min_date, max_date)
+            # st.write(bot_list)
 
 
 
@@ -187,10 +199,23 @@ def main():
 
         if any([i['gen_report'] for i in bot_list]):
             user_level_landing_page.empty()
+            selected_user = [i for i in bot_list if i['gen_report'] is True]
             st.write([i for i in bot_list if i['gen_report'] is True])
             my_bot = st.button('back to user page')
+            my_col,_ = st.columns((1, 0.0001))
+            with my_col:
+                assign_metrics(my_col, totals_df, USER_IMAGE, selected_user[0]['user_info'],
+                               language=language, add_seperator=False, pct=True, add_bot=False)
+
+                user_words_df = users_words_df[users_words_df['username'] == selected_user[0]['username']]
+                user_words_df['rank'] = user_words_df['rank'] / user_words_df['rank'].sum()
+
+                wordcloud_fig = plotly_wordcloud(user_words_df.set_index('term')['rank'].to_dict())
+
+                st.plotly_chart(wordcloud_fig, use_container_width=True)
             if my_bot:
                 main()
+
 
 
 
