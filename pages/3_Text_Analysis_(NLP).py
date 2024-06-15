@@ -99,7 +99,7 @@ def get_summarizer_df(filtered_df, language):
             if sum_bool:
                 with st.spinner('Summarizing...'):
                     try:
-                        preds = get_sum_text(conv_df_to_sum['preproc_text'].to_list())
+                        preds = get_sum_text_llm(conv_df_to_sum['preproc_text'].to_list())
                         conv_df_to_sum['sum_text'] = preds
 
                         if conv not in all_lang_dict.values():
