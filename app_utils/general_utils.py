@@ -165,8 +165,6 @@ def add_filters(add_side_filters=True):
         time_filter = st.sidebar.slider("Time Period", current_min_date, current_max_date, (min_date, max_date))
         st.session_state['time_filter'] = time_filter
 
-        # st.write(st.session_state['time_filter'])
-
         st.sidebar.write('')
 
 
