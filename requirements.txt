@@ -13,3 +13,4 @@ scikit-learn
 nltk
 scipy==1.10.1
 gensim
+geopy
