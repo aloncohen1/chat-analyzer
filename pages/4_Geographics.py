@@ -7,10 +7,21 @@ import streamlit_analytics
 from streamlit_folium import st_folium
 import folium
 
+from time import sleep
+from random import randint
+from geopy.geocoders import Nominatim
+from geopy.exc import GeocoderTimedOut, GeocoderServiceError
+import logging
+
 from app_utils.general_utils import refer_to_load_data_section, set_background, add_logo, add_filters, \
     get_locations_markers, local_css, linkedin_link, form_link, buy_me_a_coffee_link
 from app_utils.graphs_utils import generate_geo_barchart, generate_geo_piehart
 from streamlit_extras.buy_me_a_coffee import button
+
+
+
+user_agent = 'user_me_{}'.format(randint(10000,99999))
+geolocator = Nominatim(user_agent=user_agent)
 
 
 def filter_locations_df(df, locations_df, min_date, max_date):
@@ -22,12 +33,29 @@ def filter_locations_df(df, locations_df, min_date, max_date):
 
 
 
-def map_query(longitude: float, latitude: float) -> dict:
-    '''Query OpenStreetMap for a long/lat coordinate and return relevant metadata.'''
-    url = f'https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat={latitude}&lon={longitude}&zoom=18&addressdetails=1&namedetails=1'
+# def map_query(longitude: float, latitude: float) -> dict:
+#     '''Query OpenStreetMap for a long/lat coordinate and return relevant metadata.'''
+#     url = f'https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat={latitude}&lon={longitude}&zoom=18&addressdetails=1&namedetails=1'
+#
+#     data = json.loads(requests.get(url).text)
+#     return data
 
-    data = json.loads(requests.get(url).text)
-    return data
+def map_query(latitude, longitude, sleep_sec=3):
+    sleep_sec = randint(1 * 100, sleep_sec * 100) / 100
+    try:
+        return geolocator.reverse((latitude, longitude)).raw
+    except GeocoderTimedOut:
+        logging.info('TIMED OUT: GeocoderTimedOut: Retrying...')
+        sleep(randint(1 * 100, sleep_sec * 100) / 100)
+        return map_query(geolocator, (latitude, longitude), sleep_sec).raw
+    except GeocoderServiceError as e:
+        logging.info('CONNECTION REFUSED: GeocoderServiceError encountered.')
+        logging.error(e)
+        return None
+    except Exception as e:
+        logging.info('ERROR: Terminating due to exception {}'.format(e))
+        return None
+
 
 
 def get_locations_details(locations_df):
