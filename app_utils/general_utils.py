@@ -143,6 +143,9 @@ def add_metadata_to_df(df):
 
     return df
 
+def time_filter_change():
+    st.session_state['time_filter'] = st.session_state.time_filter
+
 def add_filters(add_side_filters=True):
 
     if add_side_filters:
@@ -162,11 +165,10 @@ def add_filters(add_side_filters=True):
         data_year = st.sidebar.multiselect("Year", ["All"] + list(st.session_state['data']['year'].astype(int).unique()),
                                            default='All')
 
-        time_filter = st.sidebar.slider("Time Period", current_min_date, current_max_date, (min_date, max_date))
-        st.session_state['time_filter'] = time_filter
+        time_filter = st.sidebar.slider("Time Period", min_date, max_date, (current_min_date, current_max_date),
+                                        key='time_filter', on_change=time_filter_change)
 
         st.sidebar.write('')
-
 
         users_filter = st.sidebar.multiselect("User", ["All"] + list(st.session_state['data']['username'].unique()),
                                               default='All')
