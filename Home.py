@@ -1,5 +1,7 @@
 from time import sleep
 import pandas as pd
+import zipfile
+import io
 from PIL import Image
 import streamlit_analytics
 from streamlit_extras.switch_page_button import switch_page
@@ -54,6 +56,16 @@ def load_data(files):
                 df_list.append(group_df)
             except:
                 print(file.name)
+        elif file.name.endswith('.zip'): # for zipped whatsapp files
+            with io.BytesIO(file.read()) as zip_file:
+                with zipfile.ZipFile(zip_file, 'r') as z:
+                    file_list = z.namelist()
+                    txt_file = [i for i in file_list if i.endswith('.txt')][0]  # first file endswith .txt
+                    with z.open(txt_file) as txt_file:
+                        st.session_state['file_name'] = txt_file.name.replace('.txt', '') \
+                            .replace('WhatsApp Chat with', '').replace('_', '')
+                        df_list.append(_df_from_str(txt_file.read().decode()))
+
         progress_bar.progress(((index + 1) / len(files)), text="Processing...")
     final_df = add_metadata_to_df(pd.concat(df_list, ignore_index=True)).sort_values('timestamp')
     st.session_state['data'] = final_df
@@ -86,7 +98,7 @@ def main():
 
     uploading_holder = st.empty()
     upload_text = {"en": "Choose a TXT / HTML file/s", "he": "TXT / HTML בחר קובץ אחד או יותר מסוג"}
-    uploaded_file = uploading_holder.file_uploader(upload_text[language], type=["txt", "html"], accept_multiple_files=True)
+    uploaded_file = uploading_holder.file_uploader(upload_text[language], type=["txt", "html", "zip"], accept_multiple_files=True)
 
     info_lang_dict = {'en': 'Your data is protected! nothing being saved / sent elsewhere',
                       'he': 'הדאטא שלך מוגן, הוא איננו נשמר / נשלח החוצה'}
