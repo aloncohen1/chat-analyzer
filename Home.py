@@ -89,7 +89,7 @@ def main():
     st.title(title[language])
 
     home_holder = st.empty()
-    home_holder_text = {"en": "Supports Whatsapp (.txt) / Telegram (.html)","he":"Whatsapp (.txt) / Telegram (.html) - תומך ב"}
+    home_holder_text = {"en": "Supports Whatsapp (.txt & .zip) / Telegram (.html)","he":"Whatsapp (.txt  & .zip) / Telegram (.html) - תומך ב"}
 
     w_photo = f'<img src="{WHATSAPP_IMAGE_PATH}" width="30" height="30">'
     t_photo = f'<img src="{TELEGRAM_IMAGE_PATH}" width="30" height="30">'
