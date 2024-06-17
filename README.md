@@ -8,9 +8,7 @@ An online version is available here - [Chat Analyzer](https://chat-anlyzer.strea
 
 # How to run locally
 
-First, you need to create a `secret.toml` by yourself. this file should be located at `~/.streamlit/secrets.toml` for macOS/Linux or `%userprofile%/.streamlit/secrets.toml` for Windows
-
-Read more [here](https://docs.streamlit.io/develop/concepts/connections/secrets-management)
+First, you need to create a `secret.toml` by yourself. this file should be located at `~/.streamlit/secrets.toml` for macOS/Linux or `%userprofile%/.streamlit/secrets.toml` for Windows (Read more [here](https://docs.streamlit.io/develop/concepts/connections/secrets-management))
 
 For this app, the `secret.toml` should contain the following values:
 
