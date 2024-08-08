@@ -160,7 +160,7 @@ def gen_landing_page(filtered_df, language, min_date, max_date):
 def callback():
     pass
 
-@st.experimental_dialog('User Analysis',width='large')
+@st.dialog('User Analysis',width='large')
 def gen_user_report(bot_list, totals_df, language, users_words_df):
     selected_user = [i for i in bot_list if i['gen_report'] is True]
     # st.write([i for i in bot_list if i['gen_report'] is True])
