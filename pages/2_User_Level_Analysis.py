@@ -102,7 +102,7 @@ def assign_metrics(col, totals_df, image, user_info, language, add_seperator=Tru
         col2.metric(emoji_lang_dict[language], emoji.emojize(emoji.demojize(user_info.top_freq_emoji)))
     else:
         col2.metric(emoji_lang_dict[language], 'No Emoji')
-    bot = st.button('generate report', key=user_info.username) if add_bot else None
+    bot = st.button('Show me More', key=user_info.username) if add_bot else None
     if add_seperator:
         st.divider()
 
@@ -157,8 +157,26 @@ def gen_landing_page(filtered_df, language, min_date, max_date):
 
     return totals_df, bot_list
 
-def gen_user_report():
+def callback():
     pass
+
+@st.experimental_dialog('User Analysis',width='large')
+def gen_user_report(bot_list, totals_df, language, users_words_df):
+    selected_user = [i for i in bot_list if i['gen_report'] is True]
+    # st.write([i for i in bot_list if i['gen_report'] is True])
+    my_col, _ = st.columns((1, 0.0001))
+    with my_col:
+        assign_metrics(my_col, totals_df, USER_IMAGE, selected_user[0]['user_info'],
+                       language=language, add_seperator=False, pct=True, add_bot=False)
+
+        user_words_df = users_words_df[users_words_df['username'] == selected_user[0]['username']]
+        user_words_df['rank'] = user_words_df['rank'] / user_words_df['rank'].sum()
+
+        wordcloud_fig = plotly_wordcloud(user_words_df.set_index('term')['rank'].to_dict())
+
+        selected_words = st.plotly_chart(wordcloud_fig, use_container_width=True, on_select='rerun', selection_mode='box',
+                                         key='my_chart')
+        st.write(selected_words)
 
 def get_user_terms_texts(df):
     pass
@@ -187,34 +205,11 @@ def main():
             # st.write(users_words_df)
 
             totals_df, bot_list = gen_landing_page(filtered_df, language, min_date, max_date)
-            # st.write(bot_list)
 
-
-
-
-            # st.write(pd.DataFrame(bot_list))
-            #
-            # my_bot = st.button('test')
-        # st.write(bot_list)
 
         if any([i['gen_report'] for i in bot_list]):
-            user_level_landing_page.empty()
-            selected_user = [i for i in bot_list if i['gen_report'] is True]
-            st.write([i for i in bot_list if i['gen_report'] is True])
-            my_bot = st.button('back to user page')
-            my_col,_ = st.columns((1, 0.0001))
-            with my_col:
-                assign_metrics(my_col, totals_df, USER_IMAGE, selected_user[0]['user_info'],
-                               language=language, add_seperator=False, pct=True, add_bot=False)
 
-                user_words_df = users_words_df[users_words_df['username'] == selected_user[0]['username']]
-                user_words_df['rank'] = user_words_df['rank'] / user_words_df['rank'].sum()
-
-                wordcloud_fig = plotly_wordcloud(user_words_df.set_index('term')['rank'].to_dict())
-
-                st.plotly_chart(wordcloud_fig, use_container_width=True)
-            if my_bot:
-                main()
+            gen_user_report(bot_list, totals_df, language, users_words_df)
 
 
 
