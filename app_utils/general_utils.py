@@ -89,7 +89,7 @@ def refer_to_load_data_section():
     button_text = {'en': "Take me to uploading data page!", 'he': "!קח אותי לעמוד העלאת הנתונים"}
     upload_data = st.button(button_text[language])
     if upload_data:
-        switch_page("home")
+        st.switch_page("Home.py")
 
 
 def set_background():
