@@ -1,6 +1,6 @@
 
 import streamlit as st
-import streamlit_analytics
+# import streamlit_analytics
 from streamlit_plotly_events import plotly_events
 from streamlit_extras.buy_me_a_coffee import button
 
@@ -80,10 +80,10 @@ def main():
 
 # Run the app
 if __name__ == "__main__":
-    streamlit_analytics.start_tracking()
+    # streamlit_analytics.start_tracking()
     main()
     # button(username="bigalon1991", width=221)
     linkedin_link()
     form_link()
     buy_me_a_coffee_link()
-    streamlit_analytics.stop_tracking(unsafe_password=st.secrets["tracking_pass"])
+    # streamlit_analytics.stop_tracking(unsafe_password=st.secrets["tracking_pass"])

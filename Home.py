@@ -3,8 +3,8 @@ import pandas as pd
 import zipfile
 import io
 from PIL import Image
-import streamlit_analytics
-from streamlit_extras.switch_page_button import switch_page
+# import streamlit_analytics
+# from streamlit_extras.switch_page_button import switch_page
 from streamlit_extras.buy_me_a_coffee import button
 
 import streamlit as st
@@ -77,9 +77,6 @@ def load_data(files):
 
 def main():
     # st.set_page_config(layout="wide", page_title="Hello", page_icon="👋")
-    google_site_verification_code = st.secrets['google_site_verification_code']
-    meta_tag = f'<meta name="google-site-verification" content="{google_site_verification_code}" />'
-    st.markdown(meta_tag, unsafe_allow_html=True)
 
     set_background()
 
@@ -149,7 +146,7 @@ def main():
         how_to_text_holder.empty()
         how_to_pic_holder.empty()
         load_data(uploaded_file)
-        switch_page("basic statistics")
+        st.switch_page("pages/1_Basic_Statistics.py")
         st.write("Chat Uploaded Successfully!")
         sleep(2)
 
@@ -164,11 +161,11 @@ def main():
         test_file_holder.empty()
         sleep(2)
         st.write("Chat Uploaded Successfully!")
-        switch_page("basic statistics")
+        st.switch_page("pages/1_Basic_Statistics.py")
 
 
 if __name__ == "__main__":
-    streamlit_analytics.start_tracking()
+    # streamlit_analytics.start_tracking()
     main()
     # button(username="bigalon1991", width=221,floating=False)
     linkedin_link()
@@ -178,4 +175,4 @@ if __name__ == "__main__":
     # button(username="bigalon1991", width=221, floating=False)
 
 
-    streamlit_analytics.stop_tracking(unsafe_password=st.secrets["tracking_pass"])
+    # streamlit_analytics.stop_tracking(unsafe_password=st.secrets["tracking_pass"])

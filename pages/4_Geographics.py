@@ -2,7 +2,7 @@ import pandas as pd
 import streamlit as st
 import json
 import requests
-import streamlit_analytics
+# import streamlit_analytics
 
 from streamlit_folium import st_folium
 import folium
@@ -146,10 +146,10 @@ def main():
 
 
 if __name__ == "__main__":
-    streamlit_analytics.start_tracking()
+    # streamlit_analytics.start_tracking()
     main()
     # button(username="bigalon1991", width=221)
     linkedin_link()
     form_link()
     buy_me_a_coffee_link()
-    streamlit_analytics.stop_tracking(unsafe_password=st.secrets["tracking_pass"])
+    # streamlit_analytics.stop_tracking(unsafe_password=st.secrets["tracking_pass"])
