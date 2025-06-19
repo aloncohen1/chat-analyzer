@@ -6,3 +6,4 @@
 *flas
 flask_session/
 
+.streamlit/secrets.toml
