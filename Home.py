@@ -136,32 +136,38 @@ def main():
 
         st.markdown(final_html, unsafe_allow_html=True)
 
+    def process_chat_data(is_test_data=False, file=None):
+        """
+        Process chat data either from an uploaded file or test data
+
+        Args:
+            is_test_data (bool): Whether to load test data
+            file: The uploaded file object (if not using test data)
+        """
+        # Clear all placeholders
+        info_place.empty()
+        prod_photo_holder.empty()
+        uploading_holder.empty()
+        test_file_holder.empty()
+        home_holder.empty()
+        how_to_text_holder.empty()
+        how_to_pic_holder.empty()
+
+        # Load appropriate data
+        if is_test_data:
+            load_test_data()
+        else:
+            load_data(file)
+
+        # Display success message and navigate to statistics page
+        st.write("Chat Uploaded Successfully!")
+        sleep(2)
+        st.switch_page("pages/1_Basic_Statistics.py")
 
     if uploaded_file:
-        info_place.empty()
-        prod_photo_holder.empty()
-        uploading_holder.empty()
-        test_file_holder.empty()
-        home_holder.empty()
-        how_to_text_holder.empty()
-        how_to_pic_holder.empty()
-        load_data(uploaded_file)
-        st.switch_page("pages/1_Basic_Statistics.py")
-        st.write("Chat Uploaded Successfully!")
-        sleep(2)
-
+        process_chat_data(is_test_data=False, file=uploaded_file)
     elif load_test:
-        info_place.empty()
-        prod_photo_holder.empty()
-        uploading_holder.empty()
-        home_holder.empty()
-        how_to_text_holder.empty()
-        how_to_pic_holder.empty()
-        load_test_data()
-        test_file_holder.empty()
-        sleep(2)
-        st.write("Chat Uploaded Successfully!")
-        st.switch_page("pages/1_Basic_Statistics.py")
+        process_chat_data(is_test_data=True)
 
 
 if __name__ == "__main__":
