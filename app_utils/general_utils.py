@@ -227,3 +227,18 @@ def get_locations_markers(df):
     else:
         return locations_df
 
+def get_file_to_download():
+    if st.session_state.get('data') is not None and isinstance(st.session_state['data'], pd.DataFrame):
+        # Get filename from session state or use default
+        filename = st.session_state.get('file_name', 'chat_data') + '.csv'
+
+        # Convert dataframe to CSV
+        csv = st.session_state['data'].to_csv(index=False)
+        st.write('')
+        # Add download button
+        st.download_button(
+            label="Download data as CSV",
+            data=csv,
+            file_name=filename,
+            mime='text/csv',
+        )

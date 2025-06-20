@@ -14,7 +14,7 @@ from geopy.exc import GeocoderTimedOut, GeocoderServiceError
 import logging
 
 from app_utils.general_utils import refer_to_load_data_section, set_background, add_logo, add_filters, \
-    get_locations_markers, local_css, linkedin_link, form_link, buy_me_a_coffee_link
+    get_locations_markers, local_css, linkedin_link, form_link, buy_me_a_coffee_link, get_file_to_download
 from app_utils.graphs_utils import generate_geo_barchart, generate_geo_piehart
 from streamlit_extras.buy_me_a_coffee import button
 
@@ -148,6 +148,7 @@ def main():
 if __name__ == "__main__":
     # streamlit_analytics.start_tracking()
     main()
+    get_file_to_download()
     # button(username="bigalon1991", width=221)
     linkedin_link()
     form_link()

@@ -173,12 +173,12 @@ def main():
 if __name__ == "__main__":
     # streamlit_analytics.start_tracking()
     main()
+
     # button(username="bigalon1991", width=221,floating=False)
     linkedin_link()
     form_link()
     buy_me_a_coffee_link()
 
     # button(username="bigalon1991", width=221, floating=False)
-
 
     # streamlit_analytics.stop_tracking(unsafe_password=st.secrets["tracking_pass"])
